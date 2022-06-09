@@ -28,10 +28,10 @@ public class GearPredictorCorrector implements Integrator {
     @Override
     public void nextStep(Particle particle) {
         final double m = particle.getMass();
-        final Pair f = system.force(particle);
-        final Pair fD1 = system.forceD1(particle);
-        final Pair fD2 = system.forceD2(particle);
-        final Pair fD3 = system.forceD3(particle);
+        final Pair f = system.getForce();
+        final Pair fD1 = system.getForceD1();
+        final Pair fD2 = system.getForceD2();
+        final Pair fD3 = system.getForceD3();
 
         final double rx = particle.getX(), ry = particle.getY();
         final double r1x = particle.getVx(), r1y = particle.getVy();
@@ -63,7 +63,7 @@ public class GearPredictorCorrector implements Integrator {
 
         final Particle auxParticle = new Particle(
                 predictedRx, predictedRy, predictedR1x, predictedR1y, m, particle.getCharge(), true);
-        final Pair auxF = system.force(auxParticle);
+        final Pair auxF = system.getForce();
 
         final double ax = auxF.getX() / m, ay = auxF.getY() / m;
         final double deltaR2x = (ax - predictedR2x) * taylorAuxCalculus(2);

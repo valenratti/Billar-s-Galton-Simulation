@@ -36,6 +36,7 @@ public class CellIndexMethod {
 
     private List<Particle> spawnParticles(CIMConfig config) {
         //TODO
+        return new ArrayList<>();
     }
 
     private Particle generateParticle(double i, double j) {
@@ -54,8 +55,8 @@ public class CellIndexMethod {
         cellMap.put(new CellCoordinates(row, column), cell);
     }
 
-    public Map<Particle, List<Particle>> calculateNeighbours() {
-        Map<Particle, List<Particle>> neighboursMap = new HashMap<>();
+    public Map<Particle, NeighbourWrapper> calculateNeighbours() {
+        Map<Particle, NeighbourWrapper> neighboursMap = new HashMap<>();
 
         for(Cell cell : cellMap.values()){
             List<Cell> neighbourCells = calculateNeighbourCells(cell.getRow(), cell.getColumn())
@@ -65,33 +66,34 @@ public class CellIndexMethod {
             List<Particle> onlyParticleEntities = getParticleEntities(cell.getEntityList());
 
             for (Particle particle : onlyParticleEntities) {
-                List<Particle> currentParticleNeighbours = neighboursMap.getOrDefault(particle, new ArrayList<>());
+                NeighbourWrapper currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapper());
                 for(Cell neighbourCell : neighbourCells) {
                     List<Entity> neighbours = neighbourCell.getEntityList()
                             .stream()
 //                            .filter((current) -> !current.isFixed())
                             .filter(current -> !current.equals(particle))
-                            .filter((current) -> Particle.distance(particle, current, area.getHeight()) <= area.getRc())
+                            .filter((current) -> Entity.distance(particle, current) <= area.getRc())
                             .collect(Collectors.toList())
                             .stream().distinct().collect(Collectors.toList());
 
                     neighbours.forEach((neighbour) -> {
-                        List<Particle> neighbourNeighbours = neighboursMap.getOrDefault(neighbour, new ArrayList<>());
-                        neighbourNeighbours.add(particle);
-                        neighboursMap.put(neighbour, neighbourNeighbours);
+                        if(neighbour.getType().equals(Entity.EntityType.PARTICLE)) {
+                            NeighbourWrapper neighbourNeighbours = neighboursMap.getOrDefault((Particle) neighbour, new NeighbourWrapper());
+                            neighbourNeighbours.add(particle);
+                            neighboursMap.put((Particle) neighbour, neighbourNeighbours);
+                        }
                     });
                     currentParticleNeighbours.addAll(neighbours);
                 }
                 neighboursMap.put(particle, currentParticleNeighbours);
             }
         }
-        results = neighboursMap;
         return neighboursMap;
     }
 
     private List<Particle> getParticleEntities(List<Entity> entityList){
         return entityList.stream().map((entity) -> {
-            if(entity instanceof Particle)
+            if(entity.getType().equals(Entity.EntityType.PARTICLE))
                 return (Particle) entity;
             else return null;
         }).collect(Collectors.toList());
@@ -153,7 +155,7 @@ public class CellIndexMethod {
     }
 
     public void clear(){
-        cellMap.values().forEach((list) -> list.getParticleList().clear());
+        cellMap.values().forEach((cell) -> cell.getEntityList().clear());
     }
 
 }
