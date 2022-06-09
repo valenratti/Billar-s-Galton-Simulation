@@ -62,7 +62,7 @@ public class GearPredictorCorrector implements Integrator {
         final double predictedR2y = taylor(ryList);
 
         final Particle auxParticle = new Particle(
-                predictedRx, predictedRy, predictedR1x, predictedR1y, m, particle.getRadius(), true);
+                predictedRx, predictedRy, predictedR1x, predictedR1y, m, true);
         final Pair auxF = system.getForce();
 
         final double ax = auxF.getX() / m, ay = auxF.getY() / m;

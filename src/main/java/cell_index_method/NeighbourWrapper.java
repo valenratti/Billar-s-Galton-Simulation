@@ -8,16 +8,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class NeighbourWrapper {
     private List<Particle> particles;
     private List<Wall> walls;
     private List<Obstacle> obstacles;
+
+    public NeighbourWrapper() {
+        this.particles = new ArrayList<>();
+        this.walls = new ArrayList<>();
+        this.obstacles = new ArrayList<>();
+    }
 
     public void add(Entity entity){
         if(entity.getType().equals(Entity.EntityType.PARTICLE)){

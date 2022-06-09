@@ -7,9 +7,9 @@ import java.util.Objects;
 
 @Data
 public class Particle extends Entity{
-    private static Long currentId = 0L;
+//    private static Long currentId = 0L;
 
-    private Long id;
+//    private Long id;
     private double radius;
     private double vx;
     private double vy;
@@ -21,11 +21,11 @@ public class Particle extends Entity{
     private Cell cell;
     private boolean isFixed;
 
-    public Particle(double x, double y, double vx, double vy, double mass, double radius, boolean idDisposable) {
+    public Particle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
         super(x,y);
         this.type = EntityType.PARTICLE;
-        this.id = idDisposable ? null : currentId++;
-        this.radius = radius;
+//        this.id = idDisposable ? null : currentId++;
+        this.radius = 0.3;
         this.vx = vx;
         this.vy = vy;
         this.mass = mass;
@@ -36,7 +36,7 @@ public class Particle extends Entity{
 
     public Particle(double x, double y, double vx, double vy, double mass, double radius, boolean idDisposable, boolean isFixed) {
         super(x,y);
-        this.id = idDisposable ? null : currentId++;
+//        this.id = idDisposable ? null : currentId++;
         this.radius = radius;
         this.vx = vx;
         this.vy = vy;
@@ -96,5 +96,13 @@ public class Particle extends Entity{
         Particle particle = (Particle) o;
 
         return id.equals(particle.id);
+    }
+
+    @Override
+    public String toString() {
+        return "Particle{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }

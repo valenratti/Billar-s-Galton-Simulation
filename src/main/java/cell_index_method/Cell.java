@@ -1,7 +1,9 @@
 package cell_index_method;
 
 import entity.Entity;
+import entity.Obstacle;
 import entity.Particle;
+import entity.Wall;
 import lombok.Data;
 
 import java.util.List;
@@ -24,6 +26,14 @@ public class Cell {
             throw new RuntimeException("entity.Particle cell differs from current cell");
 
         this.entityList.add(particle);
+    }
+
+    public void addObstacle(Obstacle obstacle){
+        this.entityList.add(obstacle);
+    }
+
+    public void addWall(Wall wall) {
+        this.entityList.add(wall);
     }
 
     public void clearParticles(){

@@ -6,9 +6,17 @@ import lombok.Data;
 public class Obstacle extends Entity{
     private double radius;
 
-    public Obstacle(double x, double y, double radius) {
+    public Obstacle(double x, double y) {
         super(x, y);
         this.type = EntityType.OBSTACLE;
-        this.radius = radius;
+        this.radius = 0.2;
+    }
+
+    @Override
+    public String toString() {
+        return "Obstacle{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }
