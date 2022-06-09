@@ -62,7 +62,7 @@ public class GearPredictorCorrector implements Integrator {
         final double predictedR2y = taylor(ryList);
 
         final Particle auxParticle = new Particle(
-                predictedRx, predictedRy, predictedR1x, predictedR1y, m, particle.getCharge(), true);
+                predictedRx, predictedRy, predictedR1x, predictedR1y, m, particle.getRadius(), true);
         final Pair auxF = system.getForce();
 
         final double ax = auxF.getX() / m, ay = auxF.getY() / m;
@@ -95,7 +95,8 @@ public class GearPredictorCorrector implements Integrator {
     private double getAlpha(int i) {
         switch(i) {
             case 0:
-                return system.isForceVelocityDependent() ? (double) 3 / 16 : (double) 3 / 20;
+//                return system.isForceVelocityDependent() ? (double) 3 / 16 : (double) 3 / 20;
+                return (double) 3 / 16;
             case 1:
                 return (double) 251 / 360;
             default:

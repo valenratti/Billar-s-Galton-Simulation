@@ -26,6 +26,10 @@ public class Cell {
         this.entityList.add(particle);
     }
 
+    public void clearParticles(){
+        entityList.removeIf((entity) -> entity.getType().equals(Entity.EntityType.PARTICLE));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

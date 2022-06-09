@@ -23,6 +23,7 @@ public class Particle extends Entity{
 
     public Particle(double x, double y, double vx, double vy, double mass, double radius, boolean idDisposable) {
         super(x,y);
+        this.type = EntityType.PARTICLE;
         this.id = idDisposable ? null : currentId++;
         this.radius = radius;
         this.vx = vx;

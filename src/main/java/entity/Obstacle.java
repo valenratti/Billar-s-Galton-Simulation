@@ -8,6 +8,7 @@ public class Obstacle extends Entity{
 
     public Obstacle(double x, double y, double radius) {
         super(x, y);
+        this.type = EntityType.OBSTACLE;
         this.radius = radius;
     }
 }

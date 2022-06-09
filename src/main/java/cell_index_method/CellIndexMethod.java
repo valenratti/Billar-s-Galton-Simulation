@@ -1,6 +1,7 @@
 package cell_index_method;
 
 import entity.Entity;
+import entity.Obstacle;
 import entity.Particle;
 import lombok.Data;
 import utils.Utils;
@@ -39,6 +40,11 @@ public class CellIndexMethod {
         return new ArrayList<>();
     }
 
+    private List<Obstacle> spawnObstacles(){
+        double d = 5.45;
+        return new ArrayList<>();
+    }
+
     private Particle generateParticle(double i, double j) {
         double radius = Utils.rand(config.getMinParticleRadius(), config.getMaxParticleRadius());
         // centered in the cell
@@ -68,9 +74,11 @@ public class CellIndexMethod {
             for (Particle particle : onlyParticleEntities) {
                 NeighbourWrapper currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapper());
                 for(Cell neighbourCell : neighbourCells) {
+
+                    //Identify all neighbours, they can be walls, obstacles or particles
                     List<Entity> neighbours = neighbourCell.getEntityList()
                             .stream()
-//                            .filter((current) -> !current.isFixed())
+                            .filter((current) -> !current.isFixed())
                             .filter(current -> !current.equals(particle))
                             .filter((current) -> Entity.distance(particle, current) <= area.getRc())
                             .collect(Collectors.toList())
@@ -155,7 +163,7 @@ public class CellIndexMethod {
     }
 
     public void clear(){
-        cellMap.values().forEach((cell) -> cell.getEntityList().clear());
+        cellMap.values().forEach(Cell::clearParticles);
     }
 
 }

@@ -8,6 +8,7 @@ public class Wall extends Entity{
 
     public Wall(double x, double y, double length) {
         super(x, y);
+        this.type = EntityType.WALL;
         this.length = length;
     }
 

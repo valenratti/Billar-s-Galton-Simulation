@@ -10,7 +10,12 @@ public class Utils {
         return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
-    public static double calculateSystemKineticEnergy(List<Particle> particleList) {
-        return particleList.stream().mapToDouble(Particle::getKineticEnergy).sum();
+    public static long factorial(int n) {
+        long fact = 1;
+
+        for (int i = 2; i <= n; i++)
+            fact = fact * i;
+
+        return fact;
     }
 }
