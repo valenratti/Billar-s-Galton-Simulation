@@ -2,6 +2,7 @@ package entity;
 
 import cell_index_method.Cell;
 import lombok.Data;
+import utils.Pair;
 
 import java.util.Objects;
 
@@ -46,7 +47,17 @@ public class Particle extends Entity{
         this.isFixed = isFixed;
     }
 
-    public double getVModule() {
+    public double getTangencialRelativeVelocity(Particle other){
+        double distance = Entity.distance(this, other);
+        double normalizedXDistance = (other.getX() - this.getX()) / distance;
+        double normalizedYDistance = (other.getY() - this.getY()) / distance;
+        Pair tangencial = new Pair(-normalizedYDistance, normalizedXDistance);
+        double relativeVelocityX = this.getVx() - other.getVx();
+        double relativeVelocityY = this.getVy() - other.getVy();
+        return relativeVelocityX * tangencial.getX() + relativeVelocityY * tangencial.getY();
+    }
+
+    public double getVelocityModule() {
         return Math.hypot(getVx(), getVy());
     }
 
@@ -58,7 +69,7 @@ public class Particle extends Entity{
     }
 
     public double getKineticEnergy() {
-        return 0.5 * this.mass * Math.pow(getVModule() , 2);
+        return 0.5 * this.mass * Math.pow(getVelocityModule() , 2);
     }
 
 //    public double getDistance(Particle p){
