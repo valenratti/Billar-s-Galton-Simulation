@@ -33,6 +33,7 @@ public abstract class Entity {
                 double yDistance = entity.getY() - other.getY();
                 return Math.hypot(Math.abs(xDistance), Math.abs(yDistance));
             } else if(other.getType().equals(EntityType.WALL)){
+                //TODO: CHECK Y CASE
                 return Math.abs(entity.getX() - other.getX());
             }
         }
@@ -52,6 +53,37 @@ public abstract class Entity {
                 return particle.getX() + particle.getRadius() - distance(entity, other);
             }
         }
+        return 0.0;
+    }
+
+    public static double overlapD1(Entity entity, Entity other){
+        if(entity.getType().equals(EntityType.PARTICLE)) {
+            if(other.getType().equals(EntityType.PARTICLE)){
+                return Math.hypot(((Particle) other).getVx() - ((Particle) entity).getVx(),((Particle) other).getVy() - ((Particle) entity).getVy());
+            }else if(other.getType().equals(EntityType.OBSTACLE)){
+                return Math.hypot(((Particle) entity).getVx(),((Particle) entity).getVy());
+            }else if(other.getType().equals(EntityType.WALL)){
+                //TODO: CHECK
+                Particle particle = (Particle) entity;
+                return particle.getX() + particle.getRadius() - distance(entity, other);
+            }
+        }
+        return 0.0;
+    }
+
+    public static double overlapD2(Particle particle, Particle neighbour) {
+        return 0.0;
+    }
+
+    public static double overlapD3(Particle particle, Particle neighbour) {
+        return 0.0;
+    }
+
+    public static double overlapD4(Particle particle, Particle neighbour) {
+        return 0.0;
+    }
+
+    public static double overlapD5(Particle particle, Particle neighbour) {
         return 0.0;
     }
 

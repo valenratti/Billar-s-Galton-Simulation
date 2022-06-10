@@ -21,7 +21,7 @@ public class GranularMediaForce implements System {
         this.particle = particle;
         this.neighbourWrapper = neighbourWrapper;
         this.kn = 1e+5;//N/m
-        this.kt = 1e+4; //N/m
+        this.kt = 2 * kn; //N/m
         this.lambda = 100.0; //kg/s
     }
 
@@ -55,7 +55,7 @@ public class GranularMediaForce implements System {
             double overlapSize = Entity.overlap(particle, neighbour);
             if(overlapSize > 0){
                 double tangencialRelativeVelocity = particle.getTangencialRelativeVelocity(neighbour);
-                double normalForce = -kn * overlapSize - lambda * 0.0; //TODO: Agregar nueva resta de la ecuacion
+                double normalForce = -kn * overlapSize - lambda * Entity.overlapD1(particle, neighbour); //TODO: Agregar nueva resta de la ecuacion
                 double tangencialForce = -kt * overlapSize * tangencialRelativeVelocity;
                 double distance = Entity.distance(particle, neighbour);
                 double normalizedXDistance = (neighbour.getX() - particle.getX()) / distance;
@@ -64,6 +64,25 @@ public class GranularMediaForce implements System {
                         normalForce * normalizedYDistance + tangencialForce * normalizedXDistance));
             }
         }
+        return new Pair(0.0, 0.0);
+    }
+
+    Pair forceFromParticlesD1(List<Particle> particles) {
+        Pair force = new Pair(0.0, 0.0);
+        for(Particle neighbour : particles) {
+//            double overlapSize = Entity.overlap(particle, neighbour);
+            double overlapD1 = Entity.overlapD1(particle, neighbour);
+            double relativeAccelerationTangencial = 0.0;
+            double normalForce = -kn * overlapD1 - lambda * Entity.overlapD2(particle, neighbour);
+            double tangencialForce = -kt * overlapD1 * relativeAccelerationTangencial;
+            double distance = Entity.distance(particle, neighbour);
+            double relativeVelocityModule = particle.getRelativeVelocityModule(neighbour);
+            double normalizedXDistance = - (neighbour.getX() - particle.getX()) * relativeVelocityModule / Math.pow(distance,2);
+            double normalizedYDistance = (neighbour.getY() - particle.getY()) * relativeVelocityModule / Math.pow(distance,2);
+            force.add(new Pair(normalForce * normalizedXDistance + tangencialForce * -1 * normalizedYDistance,
+                    normalForce * normalizedYDistance + tangencialForce * normalizedXDistance));
+        }
+        return force;
     }
 
     Pair forceFromWalls(List<Wall> walls){

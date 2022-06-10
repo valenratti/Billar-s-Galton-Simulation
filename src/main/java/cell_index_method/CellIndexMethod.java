@@ -77,7 +77,7 @@ public class CellIndexMethod {
         return particles;
     }
 
-    public List<Obstacle> spawnObstacles(){
+    public static List<Obstacle> spawnObstacles(){
         List<Obstacle> obstacles = new ArrayList<>();
         double d = 5.4;
         double d2 = 4.7;

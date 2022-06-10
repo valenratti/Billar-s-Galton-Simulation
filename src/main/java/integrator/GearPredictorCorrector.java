@@ -95,7 +95,6 @@ public class GearPredictorCorrector implements Integrator {
     private double getAlpha(int i) {
         switch(i) {
             case 0:
-//                return system.isForceVelocityDependent() ? (double) 3 / 16 : (double) 3 / 20;
                 return (double) 3 / 16;
             case 1:
                 return (double) 251 / 360;

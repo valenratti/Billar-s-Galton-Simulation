@@ -37,6 +37,7 @@ public class Particle extends Entity{
 
     public Particle(double x, double y, double vx, double vy, double mass, double radius, boolean idDisposable, boolean isFixed) {
         super(x,y);
+        this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
         this.radius = radius;
         this.vx = vx;
@@ -45,6 +46,10 @@ public class Particle extends Entity{
         this.ax = 0;
         this.ay = 0;
         this.isFixed = isFixed;
+    }
+
+    public double getRelativeVelocityModule(Particle other){
+        return Math.hypot(this.vx - other.getVx(), this.vy - other.getVy());
     }
 
     public double getTangencialRelativeVelocity(Particle other){
