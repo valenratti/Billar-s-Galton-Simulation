@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -40,19 +41,19 @@ public class NeighbourWrapper {
             if (entity.getType().equals(Entity.EntityType.PARTICLE)) {
                 return (Particle) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<Wall> walls = entities.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.WALL)) {
                 return (Wall) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<Obstacle> obstacles = entities.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.OBSTACLE)) {
                 return (Obstacle) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         return new NeighbourWrapper(particles, walls, obstacles);
     }
@@ -62,19 +63,19 @@ public class NeighbourWrapper {
             if (entity.getType().equals(Entity.EntityType.PARTICLE)) {
                 return (Particle) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<Wall> currentWalls = neighbours.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.WALL)) {
                 return (Wall) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<Obstacle> currentObstacles = neighbours.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.OBSTACLE)) {
                 return (Obstacle) entity;
             } else return null;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         this.particles.addAll(currentParticles);
         this.walls.addAll(currentWalls);

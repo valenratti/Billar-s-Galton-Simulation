@@ -1,10 +1,9 @@
 package integrator;
 
+import entity.Particle;
 import utils.Pair;
 
 public interface System {
+    void setParticle(Particle particle);
     Pair getForce();
-    Pair getForceD1();
-    Pair getForceD2();
-    Pair getForceD3();
 }

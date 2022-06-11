@@ -10,6 +10,8 @@ public class Pair {
     private double y;
 
     public Pair add(Pair other){
-        return new Pair(this.x + other.getX(), this.y + other.getY());
+        this.x = x + other.getX();
+        this.y = y + other.getY();
+        return this;
     }
 }

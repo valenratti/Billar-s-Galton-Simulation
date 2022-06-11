@@ -26,10 +26,10 @@ public class Particle extends Entity{
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.3;
+        this.radius = 0.5;
         this.vx = vx;
         this.vy = vy;
-        this.mass = mass;
+        this.mass = 1.0;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = false;
@@ -42,7 +42,7 @@ public class Particle extends Entity{
         this.radius = radius;
         this.vx = vx;
         this.vy = vy;
-        this.mass = mass;
+        this.mass = 1.0;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = isFixed;
@@ -60,6 +60,23 @@ public class Particle extends Entity{
         double relativeVelocityX = this.getVx() - other.getVx();
         double relativeVelocityY = this.getVy() - other.getVy();
         return relativeVelocityX * tangencial.getX() + relativeVelocityY * tangencial.getY();
+    }
+
+    public double getTangencialRelativeVelocity(Obstacle other){
+        double distance = Entity.distance(this, other);
+        double normalizedXDistance = (other.getX() - this.getX()) / distance;
+        double normalizedYDistance = (other.getY() - this.getY()) / distance;
+        Pair tangencial = new Pair(-normalizedYDistance, normalizedXDistance);
+        double relativeVelocityX = this.getVx();
+        double relativeVelocityY = this.getVy();
+        return relativeVelocityX * tangencial.getX() + relativeVelocityY * tangencial.getY();
+    }
+
+    public double getTangencialRelativeVelocity(Wall wall) {
+            if(this.getX() < wall.getX())
+                return -vy;
+            else
+                return vy;
     }
 
     public double getVelocityModule() {

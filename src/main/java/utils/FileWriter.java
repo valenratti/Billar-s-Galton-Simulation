@@ -31,11 +31,11 @@ public class FileWriter {
         simulationBufferedWriter.newLine();
 
         for(Obstacle obstacle : neighbourWrapper.getObstacles()){
-            simulationBufferedWriter.write(obstacle.getId() + " " + obstacle.getX() + " " + obstacle.getY() + " " + obstacle.getRadius());
+            simulationBufferedWriter.write(obstacle.getId() + " " + obstacle.getX() + " " + obstacle.getY() + " 0.0 0.0 " + obstacle.getRadius());
             simulationBufferedWriter.newLine();
         }
         for(Particle particle : neighbourWrapper.getParticles()){
-            simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getRadius());
+            simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getVx() + " " + particle.getVy()  + " " +  particle.getRadius());
             simulationBufferedWriter.newLine();
         }
         simulationBufferedWriter.flush();
