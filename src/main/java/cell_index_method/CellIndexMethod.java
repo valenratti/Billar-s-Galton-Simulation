@@ -38,7 +38,7 @@ public class CellIndexMethod {
         this.currentOccupiedCells = new HashSet<>();
 
         double currentY = -0.1;
-        while (currentY< 1.1) {
+        while (currentY< 2.0) {
             double currentX = -0.6;
             while (currentX < 0.6) {
                 int row = (int) Math.floor((currentY + cellSideLength / 100) / this.cellSideLength);
@@ -85,7 +85,7 @@ public class CellIndexMethod {
                 cell.addWall(wall);
             }
         }
-        int topCellRow = (int) Math.floor((1.0 - 0.0006/4) / this.cellSideLength);
+        int topCellRow = (int) Math.floor((1.9 - 0.0006/4) / this.cellSideLength);
 
         int leftWallColumn = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall leftWall = new Wall(-0.6, 0.7, 0.8, Wall.WallType.LEFT_AREA_WALL);
@@ -146,9 +146,9 @@ public class CellIndexMethod {
         double currentX;
         for(int i=0; i<14; i++){
             if(i%2 == 0){
-                currentX = -0.59 - d;
+                currentX = -0.594 - d;
             }else{
-                currentX = -0.59 + d/2 - d;
+                currentX = -0.594 + d/2 - d;
             }
             for(int j=0; j<22; j++){
                 try {

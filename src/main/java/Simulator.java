@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Simulator {
 
     public static void ej() throws IOException {
-        List<Integer> NList = List.of(150, 200, 250, 300);
+        List<Integer> NList = List.of(500);
         for(Integer n : NList) {
             simulate(n);
             FileWriter.reset();

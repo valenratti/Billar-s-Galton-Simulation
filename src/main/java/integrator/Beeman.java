@@ -5,7 +5,7 @@ import utils.Pair;
 
 import java.util.List;
 
-public class Beeman {
+public class Beeman implements Integrator{
     private double dt;
     private boolean isForceVelocityDependent;
     private static Pair fPrev; // initially null
