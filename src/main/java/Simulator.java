@@ -4,21 +4,30 @@ import cell_index_method.NeighbourWrapper;
 import entity.Particle;
 import integrator.Beeman;
 import integrator.GranularMediaForce;
-import utils.FileWriter;
+import i_o.FileWriter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Simulator {
 
+    public static void ej() throws IOException {
+        List<Integer> NList = List.of(150, 200, 250, 300);
+        for(Integer n : NList) {
+            simulate(n);
+            FileWriter.reset();
+        }
+    }
 
-    public static void simulate() throws IOException {
+
+    public static void simulate(Integer particlesN) throws IOException {
         int aux = 0;
         double dt = 5e-5;
         boolean finishedSimulation = false;
         double time = 0;
-        CIMConfig config = new CIMConfig(0.8, 1.2, 10, 0.003, 0.004, 10.0);
+        CIMConfig config = new CIMConfig(0.8, 1.2, particlesN, 0.00, 0.006, 10.0);
         CellIndexMethod cellIndexMethod = new CellIndexMethod(config);
 
         while(!finishedSimulation){
@@ -39,11 +48,11 @@ public class Simulator {
             cellIndexMethod.clear();
             aux++;
             if(aux == 50){
-                FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls(), cellIndexMethod.getObstacles()));
+                FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls(), cellIndexMethod.getObstacles()), config.getTotalParticles());
                 aux = 0;
             }
         }
-        FileWriter.finalCsv(cellIndexMethod.getParticles());
+        FileWriter.finalCsv(cellIndexMethod.getParticles(), config.getTotalParticles());
     }
 
 

@@ -27,7 +27,7 @@ public class Particle extends Entity{
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.004;
+        this.radius = 0.006;
         this.vx = vx;
         this.vy = vy;
         this.mass = 0.01;
@@ -40,7 +40,7 @@ public class Particle extends Entity{
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.004;
+        this.radius = 0.006;
         this.vx = vx;
         this.vy = vy;
         this.mass = 0.01;

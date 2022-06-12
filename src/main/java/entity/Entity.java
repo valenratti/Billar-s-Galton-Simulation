@@ -138,21 +138,21 @@ public abstract class Entity {
                 double projectedEntity = ((Particle)entity).getVx() * normalizedXDistance + ((Particle)entity).getVy() * normalizedYDistance;
                 double valueBefore = relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
                 double valueAfter = projectedOther - projectedEntity;
-                return projectedOther - projectedEntity;
+                return -(projectedOther - projectedEntity);
             }else if(other.getType().equals(EntityType.OBSTACLE)){
                 double relativeVelocityX =   ((Particle)entity).getVx();
                 double relativeVelocityY =  ((Particle)entity).getVy();
                 double distance = Entity.distance(entity,other);
                 double normalizedXDistance = (other.getX() -entity.getX()) / distance;
                 double normalizedYDistance = (other.getY() - entity.getY()) / distance;
-                return -1 * relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
+                return relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
             }else if(other.getType().equals(EntityType.WALL)){
                 double relativeVelocityX =   ((Particle)entity).getVx();
                 double relativeVelocityY =  ((Particle)entity).getVy();
                 double distance = Entity.distance(entity,other);
                 double normalizedXDistance = 0;
                 double normalizedYDistance = (other.getY() - entity.getY()) / distance;
-                return -1 * relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
+                return relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
             }
         }
         return 0.0;

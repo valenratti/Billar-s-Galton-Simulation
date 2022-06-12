@@ -5,8 +5,9 @@ import entity.Obstacle;
 import entity.Particle;
 import entity.Wall;
 import lombok.Data;
-import utils.Utils;
+import i_o.FileWriter;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,10 @@ public class CellIndexMethod {
     private final List<Particle> particles;
     private final List<Obstacle> obstacles;
     private final List<Wall> walls;
+    private final Integer particlesN;
 
-    public CellIndexMethod(CIMConfig config) {
+    public CellIndexMethod(CIMConfig config) throws IOException {
+        this.particlesN = config.getTotalParticles();
         this.config = config;
         this.cellSideLength = config.getMaxParticleRadius() * 2;
         this.cellsPerRow = calculateCellsPerRow();
@@ -35,7 +38,7 @@ public class CellIndexMethod {
         this.currentOccupiedCells = new HashSet<>();
 
         double currentY = -0.1;
-        while (currentY< 0.8) {
+        while (currentY< 1.1) {
             double currentX = -0.6;
             while (currentX < 0.6) {
                 int row = (int) Math.floor((currentY + cellSideLength / 100) / this.cellSideLength);
@@ -63,6 +66,7 @@ public class CellIndexMethod {
 
 
         this.obstacles = spawnObstacles();
+        FileWriter.binsCsv(this.getObstacles());
         this.particles = spawnParticles();
         this.walls = spawnWalls();
     }
@@ -81,14 +85,14 @@ public class CellIndexMethod {
                 cell.addWall(wall);
             }
         }
-        int topCellRow = (int) Math.floor((0.7 - 0.0008/4) / this.cellSideLength);
+        int topCellRow = (int) Math.floor((1.0 - 0.0006/4) / this.cellSideLength);
 
         int leftWallColumn = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall leftWall = new Wall(-0.6, 0.7, 0.8, Wall.WallType.LEFT_AREA_WALL);
         int rightWallColumn = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall rightWall = new Wall(0.6, 0.7, 0.8, Wall.WallType.RIGHT_AREA_WALL);
         int topWallRow = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
-        Wall topWall = new Wall(-0.6, 0.7, 1.2, Wall.WallType.TOP_WALL);
+        Wall topWall = new Wall(-0.6, 1.0, 1.2, Wall.WallType.TOP_WALL);
         int bottomWallRow = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
         Wall bottomWall = new Wall(-0.6, -0.1, 1.2, Wall.WallType.BOTTOM_WALL);
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
@@ -114,17 +118,18 @@ public class CellIndexMethod {
         List<Particle> particles = new ArrayList<>();
         double finalMaxY = maxY;
         List<Obstacle> firstRowObstacles = this.obstacles.stream().filter((o) -> o.getY() == finalMaxY).collect(Collectors.toList());
-        for(int j=1; j<7; j++) {
-            double startingX = -7 * 0.01;
+        int aux = 0;
+        for(int j=1; j<(particlesN / 15)+1; j++) {
+            double startingX = -0.0875 + ((aux++ % 2 == 0) ? -0.003 : 0.003);
             for (int i = 0; i < 15; i++) {
-                Particle uniqueParticle = new Particle(startingX, maxY + j*0.01, 0.0, 0.0, 0.01, false);
+                Particle uniqueParticle = new Particle(startingX, maxY + j*3*0.006, 0.0, 0.0, 0.01, false);
                 particles.add(uniqueParticle);
                 int row = (int) Math.floor(uniqueParticle.getY() / this.cellSideLength);
                 int column = (int) Math.floor(uniqueParticle.getX() / this.cellSideLength);
                 Cell cell = cellMap.get(new CellCoordinates(row, column));
                 uniqueParticle.setCell(cell);
                 cell.addParticle(uniqueParticle);
-                startingX += 0.007 * 2 + 0.001;
+                startingX += uniqueParticle.getRadius()*2 + uniqueParticle.getRadius() / 4;
             }
         }
         particles.add(new Particle(-0.6, -0.1, 0.0, 0.0, 0.01, 0.00000001, false, true));
@@ -141,9 +146,9 @@ public class CellIndexMethod {
         double currentX;
         for(int i=0; i<14; i++){
             if(i%2 == 0){
-                currentX = -0.58 - d;
+                currentX = -0.59 - d;
             }else{
-                currentX = -0.58 + d/2 - d;
+                currentX = -0.59 + d/2 - d;
             }
             for(int j=0; j<22; j++){
                 try {
@@ -185,7 +190,7 @@ public class CellIndexMethod {
                             .stream()
                             .filter((current) -> !current.isFixed())
                             .filter((current) -> !current.isReachedBin())
-                            .filter((current) -> current.getY() != 0.0)
+//                            .filter((current) -> current.getY() != 0.0)
                             .filter(current -> !current.equals(particle))
                             .filter((current) -> Entity.distanceFromRadius(particle, current) <= 0.0)
                             .collect(Collectors.toList())
