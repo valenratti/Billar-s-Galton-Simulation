@@ -21,15 +21,16 @@ public class Particle extends Entity{
     private double pressure;
     private Cell cell;
     private boolean isFixed;
+    private boolean reachedBin = false;
 
     public Particle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.5;
+        this.radius = 0.004;
         this.vx = vx;
         this.vy = vy;
-        this.mass = 1.0;
+        this.mass = 0.01;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = false;
@@ -39,10 +40,10 @@ public class Particle extends Entity{
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = radius;
+        this.radius = 0.004;
         this.vx = vx;
         this.vy = vy;
-        this.mass = 1.0;
+        this.mass = 0.01;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = isFixed;

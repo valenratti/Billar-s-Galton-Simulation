@@ -32,6 +32,10 @@ public class GranularMediaForce implements System {
 
     @Override
     public Pair getForce() {
+        if(neighbourWrapper.getWalls().stream().anyMatch((wall) -> wall.getWallType().equals(Wall.WallType.BOTTOM_WALL))){
+            particle.setVx(0.0);
+            particle.setVy(0.0);
+        }
         Pair forceFromParticles = forceFromParticles(neighbourWrapper.getParticles());
         Pair forceFromWalls = forceFromWalls(neighbourWrapper.getWalls());
         Pair forceFromObstacles = forceFromObstacles(neighbourWrapper.getObstacles());
@@ -45,7 +49,8 @@ public class GranularMediaForce implements System {
             double overlapSize = Entity.overlap(particle, neighbour);
             if(overlapSize > 0){
                 double tangencialRelativeVelocity = particle.getTangencialRelativeVelocity(neighbour);
-                double normalForce = -kn * overlapSize - gamma * Entity.overlapD1(particle, neighbour); //TODO: Agregar nueva resta de la ecuacion
+//                double normalForce = -kn * overlapSize - gamma * Entity.overlapD1(particle, neighbour); //TODO: Agregar nueva resta de la ecuacion
+                double normalForce = -kn * overlapSize; //TODO: Agregar nueva resta de la ecuacion
                 double tangencialForce = -kt * overlapSize * tangencialRelativeVelocity;
                 double distance = Entity.distance(particle, neighbour);
                 double normalizedXDistance = (neighbour.getX() - particle.getX()) / distance;
@@ -63,7 +68,30 @@ public class GranularMediaForce implements System {
             double overlap = Entity.overlap(particle, wall);
             double ovelapD1 = Entity.overlapD1(particle,wall);
             double relativeVelocity = particle.getTangencialRelativeVelocity(wall);
-            return force.add(new Pair(-kn *overlap- gamma *ovelapD1, -kt*overlap*relativeVelocity));
+            double normal = -kn *overlap;
+            double tangencial = -kt*overlap*relativeVelocity;
+            switch (wall.getWallType()){
+                case TOP_WALL:
+                    force.add(new Pair(tangencial, normal));
+                    break;
+                case BOTTOM_WALL:
+                    force.add(new Pair(-tangencial, -normal));
+                    break;
+                case RIGHT_AREA_WALL:
+                    force.add(new Pair(normal, -tangencial));
+                    break;
+                case LEFT_AREA_WALL:
+                    force.add(new Pair(-normal, tangencial));
+                    break;
+                case BIN_WALL:
+                    if(particle.getX() >= wall.getX()){
+                        force.add(new Pair(-normal, tangencial));
+                    }else{
+                        force.add(new Pair(normal, -tangencial));
+                    }
+                    break;
+            }
+
         }
         return force;
     }
@@ -75,7 +103,8 @@ public class GranularMediaForce implements System {
             if(overlapSize > 0){
                 double tangencialRelativeVelocity = particle.getTangencialRelativeVelocity(neighbour);
                 double overlapD1 = Entity.overlapD1(particle, neighbour);
-                double normalForce = -kn * overlapSize - gamma * overlapD1; //TODO: Agregar nueva resta de la ecuacion
+//                double normalForce = -kn * overlapSize - gamma * overlapD1; //TODO: Agregar nueva resta de la ecuacion
+                double normalForce = -kn * overlapSize; //TODO: Agregar nueva resta de la ecuacion
                 double tangencialForce = -kt * overlapSize * tangencialRelativeVelocity;
                 double distance = Entity.distance(particle, neighbour);
                 double normalizedXDistance = (neighbour.getX() - particle.getX()) / distance;

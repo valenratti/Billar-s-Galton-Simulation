@@ -18,7 +18,7 @@ public class Simulator {
         double dt = 5e-5;
         boolean finishedSimulation = false;
         double time = 0;
-        CIMConfig config = new CIMConfig(80.0, 120.0, 10, 0.3, 0.3, 10.0);
+        CIMConfig config = new CIMConfig(0.8, 1.2, 10, 0.003, 0.004, 10.0);
         CellIndexMethod cellIndexMethod = new CellIndexMethod(config);
 
         while(!finishedSimulation){
@@ -30,7 +30,7 @@ public class Simulator {
                 GranularMediaForce granularMediaForce = new GranularMediaForce(particle, neighbourWrapperMap.getOrDefault(particle, new NeighbourWrapper()));
                 Beeman beeman = new Beeman(dt, granularMediaForce);
                 beeman.nextStep(particle);
-                if(particle.getY() <= -10.0){
+                if(cellIndexMethod.getParticles().stream().filter((current) -> !current.isFixed()).allMatch(Particle::isReachedBin)){
                     finishedSimulation = true;
                 }
             }
@@ -38,11 +38,12 @@ public class Simulator {
 //            System.out.println(time);
             cellIndexMethod.clear();
             aux++;
-            if(aux == 100){
+            if(aux == 50){
                 FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls(), cellIndexMethod.getObstacles()));
                 aux = 0;
             }
         }
+        FileWriter.finalCsv(cellIndexMethod.getParticles());
     }
 
 

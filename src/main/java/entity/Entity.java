@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -88,20 +90,36 @@ public abstract class Entity {
                 Wall wall = (Wall) other;
                 if(wall.getWallType().equals(Wall.WallType.BIN_WALL)) {
                     if (entity.getY() <= wall.getY()) {
-                        return Math.abs(entity.getX() - wall.getX());
+                        if(entity.getX() > wall.getX()){
+                            return entity.getX() + ((Particle)entity).getRadius() - wall.getX();
+                        }else {
+                            return ((Particle)entity).getRadius() -  wall.getX() - entity.getX();
+                        }
                     } else{
                         double xDistance = entity.getX() - other.getX();
                         double yDistance = entity.getY() - other.getY();
-                        return Math.hypot(Math.abs(xDistance), Math.abs(yDistance));
+                        return Math.hypot(Math.abs(xDistance), Math.abs(yDistance)) - ((Particle)entity).getRadius();
                     }
                 } else if(wall.getWallType().equals(Wall.WallType.TOP_WALL)){
-                    return entity.getY() + ((Particle)entity).getRadius() - 70.0;
+                    if(entity.getY() > wall.getY()){
+                        System.out.println("overlap top wall " + (((Particle)entity).getRadius() + distance(entity, wall)));
+                        return ((Particle)entity).getRadius() + distance(entity, wall);
+                    }else {
+                        return ((Particle) entity).getRadius() - distance(entity, wall);
+                    }
                 }else if(wall.getWallType().equals(Wall.WallType.RIGHT_AREA_WALL)){
-                    return entity.getX() + ((Particle)entity).getRadius() - 60.0;
+                    System.out.println("overlap right wall " + (entity.getX() + ((Particle)entity).getRadius() - 0.6));
+                    return entity.getX() + ((Particle)entity).getRadius() - 0.6;
                 }else if (wall.getWallType().equals(Wall.WallType.LEFT_AREA_WALL)){
-                    return 60 - entity.getX() - ((Particle)entity).getRadius();
+                    if(entity.getX() < wall.getX()){
+                        System.out.println("overlap left wall " + (((Particle)entity).getRadius() + distance(entity,wall)));
+                        return ((Particle)entity).getRadius() + distance(entity,wall);
+                    }
+                    System.out.println("overlap left wall " + (((Particle)entity).getRadius() - distance(entity,wall)) );
+                    return ((Particle)entity).getRadius() - distance(entity,wall);
                 }else {
-                    return 10 - ((Particle)entity).getY() - ((Particle)entity).getRadius();
+
+                    return Math.abs(0.1 + ((Particle)entity).getY() - ((Particle)entity).getRadius());
                 }
             }
         }
@@ -116,7 +134,11 @@ public abstract class Entity {
                 double distance = Entity.distance(entity,other);
                 double normalizedXDistance = (other.getX() -entity.getX()) / distance;
                 double normalizedYDistance = (other.getY() - entity.getY()) / distance;
-                return relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
+                double projectedOther = ((Particle)other).getVx() * normalizedXDistance + ((Particle)other).getVy() * normalizedYDistance;
+                double projectedEntity = ((Particle)entity).getVx() * normalizedXDistance + ((Particle)entity).getVy() * normalizedYDistance;
+                double valueBefore = relativeVelocityX * normalizedXDistance + relativeVelocityY * normalizedYDistance;
+                double valueAfter = projectedOther - projectedEntity;
+                return projectedOther - projectedEntity;
             }else if(other.getType().equals(EntityType.OBSTACLE)){
                 double relativeVelocityX =   ((Particle)entity).getVx();
                 double relativeVelocityY =  ((Particle)entity).getVy();
@@ -140,5 +162,24 @@ public abstract class Entity {
         if(getType().equals(EntityType.PARTICLE)){
             return ((Particle) this).isFixed();
         }else return false;
+    }
+
+    public boolean isReachedBin(){
+        if(getType().equals(EntityType.PARTICLE)){
+            return ((Particle) this).isReachedBin();
+        }else return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return id.equals(entity.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
