@@ -44,7 +44,7 @@ public class FileWriter {
     }
 
     public static void finalCsv(List<Particle> particleList) throws IOException {
-        java.io.FileWriter fileWriter = new java.io.FileWriter("positions-" + LocalDateTime.now()  + ".xyz");
+        java.io.FileWriter fileWriter = new java.io.FileWriter("positions-" + LocalDateTime.now()  + ".csv");
         simulationBufferedWriter = new BufferedWriter(fileWriter);
         simulationBufferedWriter.write("particle_id, particle_x_position");
         simulationBufferedWriter.newLine();
