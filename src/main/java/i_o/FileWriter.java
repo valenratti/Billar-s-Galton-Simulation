@@ -61,8 +61,8 @@ public class FileWriter {
 
 
 
-    public static void finalCsv(List<Particle> particleList, Integer n) throws IOException {
-        java.io.FileWriter fileWriter = new java.io.FileWriter("end_positions" + "-" + n + ".csv");
+    public static void finalCsv(List<Particle> particleList, Integer n, Integer run) throws IOException {
+        java.io.FileWriter fileWriter = new java.io.FileWriter("end_positions" + "-" + n + "-" + run + ".csv");
         BufferedWriter other = new BufferedWriter(fileWriter);
         other.write("particle_id, particle_x_position");
         other.newLine();

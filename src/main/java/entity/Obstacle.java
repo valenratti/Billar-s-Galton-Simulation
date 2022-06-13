@@ -9,7 +9,7 @@ public class Obstacle extends Entity{
     public Obstacle(double x, double y) {
         super(x, y);
         this.type = EntityType.OBSTACLE;
-        this.radius = 0.004;
+        this.radius = 0.006;
     }
 
     @Override

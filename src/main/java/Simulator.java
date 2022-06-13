@@ -7,6 +7,7 @@ import integrator.GranularMediaForce;
 import i_o.FileWriter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,15 +15,18 @@ import java.util.stream.Collectors;
 public class Simulator {
 
     public static void ej() throws IOException {
-        List<Integer> NList = List.of(500);
+
+        List<Integer> NList = List.of(1001);
         for(Integer n : NList) {
-            simulate(n);
-            FileWriter.reset();
+            for(int i=4; i<5; i++) {
+                simulate(n, i);
+                FileWriter.reset();
+            }
         }
     }
 
 
-    public static void simulate(Integer particlesN) throws IOException {
+    public static void simulate(Integer particlesN, int run) throws IOException {
         int aux = 0;
         double dt = 5e-5;
         boolean finishedSimulation = false;
@@ -47,12 +51,12 @@ public class Simulator {
 //            System.out.println(time);
             cellIndexMethod.clear();
             aux++;
-            if(aux == 50){
+            if(aux == 50 && run == 4){
                 FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls(), cellIndexMethod.getObstacles()), config.getTotalParticles());
                 aux = 0;
             }
         }
-        FileWriter.finalCsv(cellIndexMethod.getParticles(), config.getTotalParticles());
+        FileWriter.finalCsv(cellIndexMethod.getParticles(), config.getTotalParticles(), run);
     }
 
 

@@ -22,7 +22,7 @@ public class GranularMediaForce implements System {
         this.neighbourWrapper = neighbourWrapper;
         this.kn = 1e+4;//N/m
         this.kt = 2 * kn; //N/m
-        this.gamma = 5; //kg/s
+        this.gamma = 10; //kg/s
     }
 
     @Override
