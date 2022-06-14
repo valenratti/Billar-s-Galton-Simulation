@@ -3,12 +3,15 @@ import numpy as np
 from scipy.stats import norm
 
 
-def histogram_and_pdf(data, bins_limits, density=True):
+def histogram_and_pdf(data, bins_limits, best_c=None, density=True):
     # https://levelup.gitconnected.com/probability-distributions-using-scipy-58fdab53d7ac
+
+    if density and best_c is None:
+        raise 'Error'
 
     # plt.bar(aux, data, align='edge', width=bin_width, edgecolor="black")
 
-    # density --> yi = Ni / (dxi * N
+    # density --> yi = Ni / (dxi * N)
     a1, a2, a3 = plt.hist(data, bins=bins_limits, edgecolor="black", density=density, label='Datos', align='mid')    # data should have particles final positions
 
     # d = [b for b in bins_limits]
@@ -19,7 +22,7 @@ def histogram_and_pdf(data, bins_limits, density=True):
     if density:
         # ajuste a distribucion gaussiana
         t = np.linspace(-60, 60, num=100)  # generates equally num spaced numbers between start and stop
-        pdf = norm.pdf(t, np.mean(data), np.std(data))
+        pdf = norm.pdf(t, np.mean(data), best_c)
         plt.plot(t, pdf, color='r', label='Ajuste')
 
         plt.title('Densidad de partículas por bin y ajuste a distribución gaussiana')
@@ -51,6 +54,11 @@ def error_vs_n(Ns, squared_error_list):
 
     plt.yscale("log")
 
+    aux = [2.4, 2.2, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0]
+    aux = [a*1e-4 for a in aux]
+    aux.append(9e-5)
+    plt.yticks(aux)
+
     plt.tight_layout()
     plt.show()
 
@@ -69,18 +77,18 @@ def mean_and_std(x_data, mean_list, std_list, title, xlabel, ylabel, suptitle=No
     plt.show()
 
 
-def squared_error(x, y, c, e):
+def c_plot(x, y, c, e, N):
     plt.plot(x, y)
     plt.plot(c, e, marker='o', color='red')
 
-    plt.text(c, e, f'({str(c)}, {(format(e, ".0f"))})')
+    plt.text(c, e, f'({str(c)}, {(format(e, ".2e"))})')
 
-    plt.xlabel('c')
+    plt.xlabel('C')
     plt.ylabel('E(c)')
-    plt.title('Error del ajuste')
+    plt.title('Error en función de C')
+    plt.suptitle(f'N = {N}')
 
-    # aux = [n * 1000 for n in range(1, 7)]
-    # plt.yticks(aux)
+    plt.yscale("log")
 
     plt.tight_layout()
     plt.show()

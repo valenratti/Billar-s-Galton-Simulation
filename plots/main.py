@@ -19,15 +19,31 @@ def read_csv_columns_to_lists(file_name, column_names):
 
 
 def squared_error(data1, data2):
-    error = 0
+    sq_error = 0
 
     for i in range(len(data1)):
-        error += pow(data1[i] - data2[i], 2)
+        sq_error += pow(data1[i] - data2[i], 2)
 
-    return error
+    return sq_error
 
 
-# Press the green button in the gutter to run the script.
+def find_best_c(data_density_, c_list_, x_list, mean_):
+    best_c_ = 0
+    min_error = float('inf')
+    squared_error_list_ = []
+
+    for c in c_list_:   # c = std
+        norm_pdf = norm.pdf(x_list, mean_, c)
+        squared_error_ = squared_error(data_density_, norm_pdf)
+
+        squared_error_list_.append(squared_error_)
+        if squared_error_ < min_error:
+            min_error = squared_error_
+            best_c_ = c
+
+    return best_c_, min_error, squared_error_list_
+
+
 if __name__ == '__main__':
     print('Running...')
 
@@ -47,8 +63,10 @@ if __name__ == '__main__':
     col_names = ['particle_id', ' particle_x_position']
 
     squared_error_list = []
+    limits = [(102, 127), (125, 150), (142, 173), (174, 208)]
 
-    for N in Ns:
+    for i in range(len(Ns)):
+        N = Ns[i]
         # for i in range(5):
         lists = read_csv_columns_to_lists(f'{path}end_positions-{str(N)}.csv', col_names)
         data = lists[1]
@@ -70,15 +88,25 @@ if __name__ == '__main__':
         # - informar error, std y mean (barra central)
         # - grafico c del ajuste
 
-        a1 = plots.histogram_and_pdf(data, bins_limits, density=False)
-        data_density, normal_fit = plots.histogram_and_pdf(data, bins_limits, first_bin_position)
+        a1, gbg = plots.histogram_and_pdf(data, bins_limits, density=False)
 
-        print(f'mean: {np.mean(normal_fit)}, std: {np.std(normal_fit)}')
+        s = sum(a1)
+        data_density = [a / (bin_width * s) for a in a1]
+
+        lim = limits[i]
+        c_list = [c / 10 for c in range(lim[0], lim[1])]  # [..., 100, 100.1, 100.2, ...]
+        best_c, min_err, c_error_list = find_best_c(data_density, c_list, bins_positions_center, mean)
+        plots.c_plot(c_list, c_error_list, best_c, min_err, N)
+
+        data_density2, normal_fit = plots.histogram_and_pdf(data, bins_limits, best_c)
+
+        if squared_error(data_density, data_density2) > 1e-20:
+            raise 'Error data density'
+
+        # print(f'mean: {np.mean(normal_fit)}, std: {np.std(normal_fit)}')
         print(a1)
 
-        pdf = norm.pdf(bins_positions_center, mean, std)
-
-        squared_error_list.append(squared_error(data_density, pdf))
+        squared_error_list.append(min_err)
 
     # Error del ajuste vs n
     plots.error_vs_n(Ns, squared_error_list)
