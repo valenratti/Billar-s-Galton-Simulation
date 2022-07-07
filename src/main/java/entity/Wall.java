@@ -15,6 +15,6 @@ public class Wall extends Entity{
     }
 
     public enum WallType{
-        BIN_WALL, LEFT_AREA_WALL, RIGHT_AREA_WALL, TOP_WALL, BOTTOM_WALL
+        LEFT_AREA_WALL, RIGHT_AREA_WALL, TOP_WALL, BOTTOM_WALL
     }
 }

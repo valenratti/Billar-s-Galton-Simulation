@@ -144,12 +144,6 @@ public abstract class Entity {
         }else return false;
     }
 
-    public boolean isReachedBin(){
-        if(getType().equals(EntityType.PARTICLE)){
-            return ((Particle) this).isReachedBin();
-        }else return false;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

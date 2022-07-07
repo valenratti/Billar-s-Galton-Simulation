@@ -148,7 +148,6 @@ public class CellIndexMethod {
                     List<Entity> neighbours = neighbourCell.getEntityList()
                             .stream()
                             .filter((current) -> !current.isFixed())
-                            .filter((current) -> !current.isReachedBin())
 //                            .filter((current) -> current.getY() != 0.0)
                             .filter(current -> !current.equals(particle))
                             .filter((current) -> Entity.distanceFromRadius(particle, current) <= 0.0)

@@ -84,12 +84,6 @@ public class GranularMediaForce implements System {
                 case LEFT_AREA_WALL:
                     force.add(new Pair(-normal, tangencial));
                     break;
-                case BIN_WALL:
-                    if(particle.getX() >= wall.getX())
-                        force.add(new Pair(-normal, tangencial));
-                    else
-                        force.add(new Pair(normal, -tangencial));
-                    break;
             }
 
         }

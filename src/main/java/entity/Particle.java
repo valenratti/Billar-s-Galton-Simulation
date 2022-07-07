@@ -21,7 +21,6 @@ public class Particle extends Entity{
     private double pressure;
     private Cell cell;
     private boolean isFixed;
-    private boolean reachedBin = false;
 
     public Particle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
         super(x,y);

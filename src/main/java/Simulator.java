@@ -29,29 +29,25 @@ public class Simulator {
     public static void simulate(Integer particlesN, int run) throws IOException {
         int aux = 0;
         double dt = 5e-5;
-        boolean finishedSimulation = false;
-        double time = 0;
+        double time = 0, finishTime = 10;
         CIMConfig config = new CIMConfig(0.8, 1.2, particlesN, 0.00, 0.006, 10.0);
         CellIndexMethod cellIndexMethod = new CellIndexMethod(config);
 
-        while(!finishedSimulation){
-            if(time!= 0d){
+        while(time < finishTime) {  // TODO: Ver criterio de corte
+            if(time!= 0d)
                 cellIndexMethod.updateParticles();
-            }
+
             Map<Particle, NeighbourWrapper> neighbourWrapperMap = cellIndexMethod.calculateNeighbours();
             for(Particle particle : cellIndexMethod.getParticles().stream().filter((particle) -> !particle.isFixed()).collect(Collectors.toList())){
                 GranularMediaForce granularMediaForce = new GranularMediaForce(particle, neighbourWrapperMap.getOrDefault(particle, new NeighbourWrapper()));
                 Beeman beeman = new Beeman(dt, granularMediaForce);
                 beeman.nextStep(particle);
-                if(cellIndexMethod.getParticles().stream().filter((current) -> !current.isFixed()).allMatch(Particle::isReachedBin)){
-                    finishedSimulation = true;
-                }
             }
-            time+=dt;
+            time += dt;
 //            System.out.println(time);
             cellIndexMethod.clear();
             aux++;
-            if(aux == 50 && run == 4){
+            if(aux == 50 && run == 4) {
                 FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls()), config.getTotalParticles());
                 aux = 0;
             }
