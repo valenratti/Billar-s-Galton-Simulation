@@ -52,7 +52,7 @@ public class Simulator {
             cellIndexMethod.clear();
             aux++;
             if(aux == 50 && run == 4){
-                FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls(), cellIndexMethod.getObstacles()), config.getTotalParticles());
+                FileWriter.printPositions(new NeighbourWrapper(cellIndexMethod.getParticles(), cellIndexMethod.getWalls()), config.getTotalParticles());
                 aux = 0;
             }
         }

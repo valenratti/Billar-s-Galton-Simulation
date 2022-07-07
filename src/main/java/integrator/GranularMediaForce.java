@@ -2,7 +2,6 @@ package integrator;
 
 import cell_index_method.NeighbourWrapper;
 import entity.Entity;
-import entity.Obstacle;
 import entity.Particle;
 import entity.Wall;
 import utils.Pair;
@@ -32,22 +31,21 @@ public class GranularMediaForce implements System {
 
     @Override
     public Pair getForce() {
-        if(neighbourWrapper.getWalls().stream().anyMatch((wall) -> wall.getWallType().equals(Wall.WallType.BOTTOM_WALL))){
+        if(neighbourWrapper.getWalls().stream().anyMatch((wall) -> wall.getWallType().equals(Wall.WallType.BOTTOM_WALL))) {
             particle.setVx(0.0);
             particle.setVy(0.0);
         }
         Pair forceFromParticles = forceFromParticles(neighbourWrapper.getParticles());
         Pair forceFromWalls = forceFromWalls(neighbourWrapper.getWalls());
-        Pair forceFromObstacles = forceFromObstacles(neighbourWrapper.getObstacles());
         Pair gravityForce = new Pair(0.0,-9.8 * particle.getMass());
-        return forceFromParticles.add(forceFromWalls).add(forceFromObstacles).add(gravityForce);
+        return forceFromParticles.add(forceFromWalls).add(gravityForce);
     }
 
     Pair forceFromParticles(List<Particle> particles){
         Pair force = new Pair(0.0, 0.0);
         for(Particle neighbour : particles) {
             double overlapSize = Entity.overlap(particle, neighbour);
-            if(overlapSize > 0){
+            if(overlapSize > 0) {
                 double tangencialRelativeVelocity = particle.getTangencialRelativeVelocity(neighbour);
                 double overlapD1 = Entity.overlapD1(particle, neighbour);
 //                java.lang.System.out.println("OverlapD1 PARTICLES : " + overlapD1);
@@ -73,7 +71,7 @@ public class GranularMediaForce implements System {
             double relativeVelocity = particle.getTangencialRelativeVelocity(wall);
             double normal = -kn * overlap - gamma * overlapD1;
             double tangencial = -kt*overlap*relativeVelocity;
-            switch (wall.getWallType()){
+            switch (wall.getWallType()) {
                 case TOP_WALL:
                     force.add(new Pair(tangencial, normal));
                     break;
@@ -87,11 +85,10 @@ public class GranularMediaForce implements System {
                     force.add(new Pair(-normal, tangencial));
                     break;
                 case BIN_WALL:
-                    if(particle.getX() >= wall.getX()){
+                    if(particle.getX() >= wall.getX())
                         force.add(new Pair(-normal, tangencial));
-                    }else{
+                    else
                         force.add(new Pair(normal, -tangencial));
-                    }
                     break;
             }
 
@@ -99,25 +96,4 @@ public class GranularMediaForce implements System {
         return force;
     }
 
-    Pair forceFromObstacles(List<Obstacle> obstacles){
-        Pair force = new Pair(0.0, 0.0);
-        for(Obstacle neighbour : obstacles) {
-            double overlapSize = Entity.overlap(particle, neighbour);
-            if(overlapSize > 0){
-                double tangencialRelativeVelocity = particle.getTangencialRelativeVelocity(neighbour);
-                double overlapD1 = Entity.overlapD1(particle, neighbour);
-//                java.lang.System.out.println("OverlapD1 OBSTACLES : " + overlapD1);
-                double normalForce = -kn * overlapSize - gamma * overlapD1; //TODO: Agregar nueva resta de la ecuacion
-//                double normalForce = -kn * overlapSize; //TODO: Agregar nueva resta de la ecuacion
-                double tangencialForce = -kt * overlapSize * tangencialRelativeVelocity;
-                double distance = Entity.distance(particle, neighbour);
-                double normalizedXDistance = (neighbour.getX() - particle.getX()) / distance;
-                double normalizedYDistance = (neighbour.getY() - particle.getY()) / distance;
-                Pair toAdd = new Pair(normalForce * normalizedXDistance + tangencialForce * -1 * normalizedYDistance,
-                        normalForce * normalizedYDistance + tangencialForce * normalizedXDistance);
-                force.add(toAdd);
-            }
-        }
-        return force;
-    }
 }

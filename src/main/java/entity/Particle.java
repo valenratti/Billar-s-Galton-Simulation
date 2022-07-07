@@ -63,16 +63,6 @@ public class Particle extends Entity{
         return relativeVelocityX * tangencial.getX() + relativeVelocityY * tangencial.getY();
     }
 
-    public double getTangencialRelativeVelocity(Obstacle other){
-        double distance = Entity.distance(this, other);
-        double normalizedXDistance = (other.getX() - this.getX()) / distance;
-        double normalizedYDistance = (other.getY() - this.getY()) / distance;
-        Pair tangencial = new Pair(-normalizedYDistance, normalizedXDistance);
-        double relativeVelocityX = this.getVx();
-        double relativeVelocityY = this.getVy();
-        return relativeVelocityX * tangencial.getX() + relativeVelocityY * tangencial.getY();
-    }
-
     public double getTangencialRelativeVelocity(Wall wall) {
             if(this.getX() < wall.getX())
                 return -vy;

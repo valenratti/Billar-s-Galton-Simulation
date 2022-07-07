@@ -1,15 +1,11 @@
 package i_o;
 
 import cell_index_method.NeighbourWrapper;
-import entity.Obstacle;
 import entity.Particle;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FileWriter {
@@ -29,15 +25,9 @@ public class FileWriter {
         if(simulationBufferedWriter == null){
             generateXYZFile(n);
         }
-        int totalSize = neighbourWrapper.getObstacles().size() + neighbourWrapper.getParticles().size();
-        simulationBufferedWriter.write(String.valueOf(totalSize));
-        simulationBufferedWriter.newLine();
+
         simulationBufferedWriter.newLine();
 
-        for(Obstacle obstacle : neighbourWrapper.getObstacles()){
-            simulationBufferedWriter.write(obstacle.getId() + " " + obstacle.getX() + " " + obstacle.getY() + " 0.0 0.0 " + obstacle.getRadius());
-            simulationBufferedWriter.newLine();
-        }
         for(Particle particle : neighbourWrapper.getParticles()){
             simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getVx() + " " + particle.getVy()  + " " +  particle.getRadius());
             simulationBufferedWriter.newLine();
@@ -45,19 +35,7 @@ public class FileWriter {
         simulationBufferedWriter.flush();
     }
 
-    public static void binsCsv(List<Obstacle> obstacles) throws IOException {
-        java.io.FileWriter fileWriter = new java.io.FileWriter("bins.csv");
-        BufferedWriter other = new BufferedWriter(fileWriter);
-        other.write("bin_start, bin_end");
-        other.newLine();
-        Set<Double> bins = obstacles.stream().filter((obstacle) -> obstacle.getY() == 0).map(Obstacle::getX).sorted().collect(Collectors.toSet());
-        List<Double> fromSet = new ArrayList<>(bins).stream().sorted().collect(Collectors.toList());
-        for(int i=0; i<bins.size()-1; i++){
-            other.write(fromSet.get(i) + "," + fromSet.get(i+1));
-            other.newLine();
-        }
-        other.flush();
-    }
+//o
 
 
 

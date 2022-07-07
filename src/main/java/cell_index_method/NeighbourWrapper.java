@@ -1,7 +1,6 @@
 package cell_index_method;
 
 import entity.Entity;
-import entity.Obstacle;
 import entity.Particle;
 import entity.Wall;
 import lombok.AllArgsConstructor;
@@ -18,22 +17,24 @@ import java.util.stream.Collectors;
 public class NeighbourWrapper {
     private List<Particle> particles;
     private List<Wall> walls;
-    private List<Obstacle> obstacles;
 
     public NeighbourWrapper() {
         this.particles = new ArrayList<>();
         this.walls = new ArrayList<>();
-        this.obstacles = new ArrayList<>();
     }
 
     public void add(Entity entity){
-        if(entity.getType().equals(Entity.EntityType.PARTICLE)){
+        if(entity.getType().equals(Entity.EntityType.PARTICLE)) {
             particles.add((Particle) entity);
-        }else if(entity.getType().equals(Entity.EntityType.WALL)){
-            walls.add((Wall) entity);
-        }else {
-            obstacles.add((Obstacle) obstacles);
+            return;
         }
+
+        if(entity.getType().equals(Entity.EntityType.WALL)) {
+            walls.add((Wall) entity);
+            return;
+        }
+
+        System.out.println("Bug");
     }
 
     public static NeighbourWrapper fromEntities(List<Entity> entities){
@@ -49,13 +50,7 @@ public class NeighbourWrapper {
             } else return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        List<Obstacle> obstacles = entities.stream().map((entity) -> {
-            if (entity.getType().equals(Entity.EntityType.OBSTACLE)) {
-                return (Obstacle) entity;
-            } else return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        return new NeighbourWrapper(particles, walls, obstacles);
+        return new NeighbourWrapper(particles, walls);
     }
 
     public void addAll(List<Entity> neighbours) {
@@ -71,14 +66,7 @@ public class NeighbourWrapper {
             } else return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        List<Obstacle> currentObstacles = neighbours.stream().map((entity) -> {
-            if (entity.getType().equals(Entity.EntityType.OBSTACLE)) {
-                return (Obstacle) entity;
-            } else return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
         this.particles.addAll(currentParticles);
         this.walls.addAll(currentWalls);
-        this.obstacles.addAll(currentObstacles);
     }
 }

@@ -1,11 +1,9 @@
 package cell_index_method;
 
 import entity.Entity;
-import entity.Obstacle;
 import entity.Particle;
 import entity.Wall;
 import lombok.Data;
-import i_o.FileWriter;
 import utils.Utils;
 
 import java.io.IOException;
@@ -24,7 +22,6 @@ public class CellIndexMethod {
     private final double cellSideLength;
     private final CIMConfig config;
     private final List<Particle> particles;
-    private final List<Obstacle> obstacles;
     private final List<Wall> walls;
     private final Integer particlesN;
 
@@ -50,7 +47,7 @@ public class CellIndexMethod {
             currentY+= cellSideLength;
         }
 
-        System.out.println(cellMap.keySet().size());
+//        System.out.println(cellMap.keySet().size());
 
 //        for(int i = cellsPerColumn - 1; i >= 0; i--)
 //            for(int j = -cellsPerRow/2; j < cellsPerRow/2; j++) {
@@ -64,67 +61,57 @@ public class CellIndexMethod {
 //                System.out.println(i + " " + j);
 //            }
 
-
-
-        this.obstacles = spawnObstacles();
-        FileWriter.binsCsv(this.getObstacles());
         this.particles = spawnParticles();
         this.walls = spawnWalls();
     }
 
-    public List<Wall> spawnWalls(){
+    private List<Wall> spawnWalls(){
         List<Wall> walls = new ArrayList<>();
-        double minY = this.obstacles.stream().min(Comparator.comparingDouble(Entity::getY)).get().getY();
-        List<Obstacle> firstRowObstacles = this.obstacles.stream().filter((o) -> o.getY() == minY).collect(Collectors.toList());
-        for(Obstacle obstacle : firstRowObstacles){
-            int row = (int) Math.floor(obstacle.getY() / this.cellSideLength);
-            int column = (int) Math.floor(obstacle.getX() / this.cellSideLength);
-            Wall wall = new Wall(obstacle.getX(), obstacle.getY(), 10.0, Wall.WallType.BIN_WALL);
-            walls.add(wall);
-            for(int i=0; i<16; i++){
-                Cell cell = cellMap.get(new CellCoordinates(row+i, column));
-                cell.addWall(wall);
-            }
-        }
+
         int topCellRow = (int) Math.floor((4.0 - 0.0006/4) / this.cellSideLength);
 
         int leftWallColumn = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall leftWall = new Wall(-0.6, 0.7, 0.8, Wall.WallType.LEFT_AREA_WALL);
+
         int rightWallColumn = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall rightWall = new Wall(0.6, 0.7, 0.8, Wall.WallType.RIGHT_AREA_WALL);
+
         int topWallRow = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
 //        Wall topWall = new Wall(-0.6, 5.0, 1.2, Wall.WallType.TOP_WALL);
+
         int bottomWallRow = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
         Wall bottomWall = new Wall(-0.6, -0.1, 1.2, Wall.WallType.BOTTOM_WALL);
+
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
         Set<Integer> allColumns = cellMap.keySet().stream().map(CellCoordinates::getColumn).sorted().collect(Collectors.toSet());
+
         for(Integer row : allRows){
             Cell leftCell = cellMap.get(new CellCoordinates(row,leftWallColumn));
             Cell rightCell = cellMap.get(new CellCoordinates(row,rightWallColumn));
             leftCell.addWall(leftWall);
             rightCell.addWall(rightWall);
         }
+
         for(Integer column : allColumns){
             Cell topCell = cellMap.get(new CellCoordinates(topCellRow,column));
             Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow,column));
 //            topCell.addWall(topWall);
             bottomCell.addWall(bottomWall);
         }
-//        obstacles.removeAll(firstRowObstacles);
+
         return walls;
     }
 
-    public List<Particle> spawnParticles() {
-        double maxY = this.obstacles.stream().max(Comparator.comparingDouble(Entity::getY)).get().getY();
+    private List<Particle> spawnParticles() {
+        // TODO: Check spawn
+
         List<Particle> particles = new ArrayList<>();
-        double finalMaxY = maxY;
-        List<Obstacle> firstRowObstacles = this.obstacles.stream().filter((o) -> o.getY() == finalMaxY).collect(Collectors.toList());
-        int aux = 0;
+
         for(int j=1; j<(particlesN / 15)+1; j++) {
             double displacement = Utils.rand(-0.002, 0.002);
             double startingX = -0.063 + displacement;
             for (int i = 0; i < 15; i++) {
-                Particle uniqueParticle = new Particle(startingX, maxY + j*0.01, 0.0, 0.0, 0.01, false);
+                Particle uniqueParticle = new Particle(startingX, this.config.getAreaHeight() + j*0.01, 0.0, 0.0, 0.01, false);
                 particles.add(uniqueParticle);
                 int row = (int) Math.floor(uniqueParticle.getY() / this.cellSideLength);
                 int column = (int) Math.floor(uniqueParticle.getX() / this.cellSideLength);
@@ -134,43 +121,13 @@ public class CellIndexMethod {
                 startingX += uniqueParticle.getRadius()*2 + uniqueParticle.getRadius() / 4;
             }
         }
+
         particles.add(new Particle(-0.6, -0.1, 0.0, 0.0, 0.01, 0.00000001, false, true));
         particles.add(new Particle(-0.6, 0.7, 0.0, 0.0, 0.01, 0.00000001, false, true));
         particles.add(new Particle(0.6, -0.1, 0.0, 0.0, 0.01, 0.00000001, false, true));
         particles.add(new Particle(0.6, 0.7, 0.0, 0.0, 0.01, 0.00000001, false, true));
-        return particles;
-    }
 
-    public List<Obstacle> spawnObstacles(){
-        List<Obstacle> obstacles = new ArrayList<>();
-        double d = 0.054;
-        double d2 = 0.047;
-        double currentX;
-        for(int i=0; i<14; i++){
-            if(i%2 == 0){
-                currentX = -0.594 - d;
-            }else{
-                currentX = -0.594 + d/2 - d;
-            }
-            for(int j=0; j<22; j++){
-                try {
-                    double x = currentX + d;
-                    double y = i * d2;
-                    Obstacle obstacle = new Obstacle(x, y);
-                    obstacles.add(obstacle);
-                    int row = (int) Math.floor(y / this.cellSideLength);
-                    int column = (int) Math.floor(x / this.cellSideLength);
-                    Cell cell = cellMap.get(new CellCoordinates(row, column));
-                    obstacle.setCell(cell);
-                    cell.addObstacle(obstacle);
-                    currentOccupiedCells.add(new CellCoordinates(row, column));
-                    currentX += d;
-                } catch(NullPointerException e){
-                    System.out.println("here");
-                }
-            }
-        }
-        return obstacles;
+        return particles;
     }
 
     public Map<Particle, NeighbourWrapper> calculateNeighbours() {
@@ -187,7 +144,7 @@ public class CellIndexMethod {
                 NeighbourWrapper currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapper());
                 for(Cell neighbourCell : neighbourCells) {
 
-                    //Identify all neighbours, they can be walls, obstacles or particles
+                    //Identify all neighbours, they can be walls or particles
                     List<Entity> neighbours = neighbourCell.getEntityList()
                             .stream()
                             .filter((current) -> !current.isFixed())
