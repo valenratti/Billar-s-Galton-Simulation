@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
-public class CellIndexMethod {
+public class CellIndexMethodSquaredParticles {
 
     private final Map<CellCoordinates, Cell> cellMap;
     private Set<CellCoordinates> currentOccupiedCells;
@@ -22,11 +22,11 @@ public class CellIndexMethod {
     private final int negativeCellsPerColumn;
     private final double cellSideLength;
     private final CIMConfig config;
-    private final List<Particle> particles;
+    private final List<SquaredParticle> particles;
     private final List<Wall> walls;
     private final Integer particlesN;
 
-    public CellIndexMethod(CIMConfig config) throws IOException {
+    public CellIndexMethodSquaredParticles(CIMConfig config) throws IOException {
         this.particlesN = config.getTotalParticles();
         this.config = config;
         this.cellSideLength = config.getMaxParticleRadius() * 2;
@@ -87,21 +87,37 @@ public class CellIndexMethod {
         return walls;
     }
 
-    private List<Particle> spawnParticles() {
-        return new ArrayList<>();
+    private List<SquaredParticle> spawnParticles() {
+        List<SquaredParticle> squaredParticles = new ArrayList<>();
+        int bottomRow = (int) Math.floor((0.5 + cellSideLength / 100) / this.cellSideLength);
+        List<CellCoordinates> possibleCells = cellMap.keySet().stream().filter((cell) -> cell.getRow() >= bottomRow).collect(Collectors.toList());
+        Collections.shuffle(possibleCells);
+
+        for(int i=0; i< particlesN; i++){
+            CellCoordinates coords = possibleCells.get(i);
+            double particleX = coords.getColumn() * cellSideLength + (cellSideLength / 2); // centered
+            double particleY = coords.getRow() * cellSideLength + cellSideLength / 2; //centered
+            double randLength = Utils.rand(7.07 * 10e-3, 0.0106);
+            SquaredParticle particle = new SquaredParticle(particleX, particleY, 0.0, 0.0, 0.01, randLength, false, false);
+            Cell cell = cellMap.get(coords);
+            cell.addSquaredParticle(particle);
+            particle.setCell(cell);
+            squaredParticles.add(particle);
+        }
+        return squaredParticles;
     }
 
-    public Map<Particle, NeighbourWrapper> calculateNeighbours() {
-        Map<Particle, NeighbourWrapper> neighboursMap = new HashMap<>();
+    public Map<SquaredParticle, NeighbourWrapper> calculateNeighbours() {
+        Map<SquaredParticle, NeighbourWrapper> neighboursMap = new HashMap<>();
 
         for(Cell cell : currentOccupiedCells.stream().map(cellMap::get).collect(Collectors.toList())){
             List<Cell> neighbourCells = calculateNeighbourCells(cell.getRow(), cell.getColumn())
                     .stream().map(cellMap::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            List<Particle> onlyParticleEntities = getParticleEntities(cell.getEntityList());
+            List<SquaredParticle> onlyParticleEntities = getParticleEntities(cell.getEntityList());
 
-            for (Particle particle : onlyParticleEntities) {
+            for (SquaredParticle particle : onlyParticleEntities) {
                 NeighbourWrapper currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapper());
                 for(Cell neighbourCell : neighbourCells) {
 
@@ -119,7 +135,7 @@ public class CellIndexMethod {
                         if(neighbour.getType().equals(Entity.EntityType.PARTICLE)) {
                             NeighbourWrapper neighbourNeighbours = neighboursMap.getOrDefault((Particle) neighbour, new NeighbourWrapper());
                             neighbourNeighbours.add(particle);
-                            neighboursMap.put((Particle) neighbour, neighbourNeighbours);
+                            neighboursMap.put((SquaredParticle) neighbour, neighbourNeighbours);
                         }
                     });
                     currentParticleNeighbours.addAll(neighbours);
@@ -130,10 +146,10 @@ public class CellIndexMethod {
         return neighboursMap;
     }
 
-    private List<Particle> getParticleEntities(List<Entity> entityList){
+    private List<SquaredParticle> getParticleEntities(List<Entity> entityList){
         return entityList.stream().map((entity) -> {
-            if(entity.getType().equals(Entity.EntityType.PARTICLE))
-                return (Particle) entity;
+            if(entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE))
+                return (SquaredParticle) entity;
             else return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
@@ -177,13 +193,13 @@ public class CellIndexMethod {
 
     public void updateParticles(){
         Set<CellCoordinates> currentOccupiedCells = new HashSet<>();
-        for(Particle particle : particles.stream().filter(particle -> !particle.isFixed()).collect(Collectors.toList())) {
+        for(SquaredParticle particle : particles.stream().filter(particle -> !particle.isFixed()).collect(Collectors.toList())) {
             int row = (int) Math.floor(particle.getY() / this.cellSideLength);
             int column = (int) Math.floor(particle.getX() / this.cellSideLength);
             try {
                 Cell cell = cellMap.get(new CellCoordinates(row, column));
                 particle.setCell(cell);
-                cell.addParticle(particle);
+                cell.addSquaredParticle(particle);
                 currentOccupiedCells.add(new CellCoordinates(row, column));
             } catch (Exception e){
                 //                    FileWriter.printPositions(0,particles);

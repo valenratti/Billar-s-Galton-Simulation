@@ -2,6 +2,7 @@ package cell_index_method;
 
 import entity.Entity;
 import entity.Particle;
+import entity.SquaredParticle;
 import entity.Wall;
 import lombok.Data;
 
@@ -25,6 +26,13 @@ public class Cell {
             throw new RuntimeException("entity.Particle cell differs from current cell");
 
         this.entityList.add(particle);
+    }
+
+    public void addSquaredParticle(SquaredParticle squaredParticle){
+        if(!squaredParticle.getCell().equals(this))
+            throw new RuntimeException("entity.Particle cell differs from current cell");
+
+        this.entityList.add(squaredParticle);
     }
 
     public void addWall(Wall wall) {
