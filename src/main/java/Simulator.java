@@ -14,23 +14,12 @@ import java.util.stream.Collectors;
 
 public class Simulator {
 
-    public static void ej() throws IOException {
-
-        List<Integer> NList = List.of(1001);
-        for(Integer n : NList) {
-            for(int i=4; i<5; i++) {
-                simulate(n, i);
-                FileWriter.reset();
-            }
-        }
-    }
-
 
     public static void simulate(Integer particlesN, int run) throws IOException {
         int aux = 0;
         double dt = 5e-5;
         double time = 0, finishTime = 10;
-        CIMConfig config = new CIMConfig(0.8, 1.2, particlesN, 0.00, 0.006, 10.0);
+        CIMConfig config = new CIMConfig(1.0, 0.3, particlesN, 7.07 * 10e-3, 0.0106, 10.0);
         CellIndexMethod cellIndexMethod = new CellIndexMethod(config);
 
         while(time < finishTime) {  // TODO: Ver criterio de corte
