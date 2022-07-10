@@ -18,4 +18,11 @@ public class Utils {
 
         return fact;
     }
+
+    public static double distance(Pair p1, Pair p2) {
+        double xDistance = p1.getX() - p2.getX();
+        double yDistance = p1.getY() - p2.getY();
+
+        return Math.hypot(Math.abs(xDistance), Math.abs(yDistance));
+    }
 }

@@ -4,6 +4,9 @@ import cell_index_method.Cell;
 import lombok.Data;
 import utils.Pair;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -21,31 +24,41 @@ public class SquaredParticle extends Entity {
     private double pressure;
     private Cell cell;
     private boolean isFixed;
+    private double torque;
+    private List<Pair> vertexList = new ArrayList<>(4);
 
-    public SquaredParticle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
+    public enum VertexType {
+        LEFT_DOWN, LEFT_UP, RIGHT_UP, RIGHT_DOWN
+    }
+
+    public SquaredParticle(double x, double y, double vx, double vy, double mass, double sideLength, boolean idDisposable) {
         super(x,y);
         this.type = EntityType.SQUARED_PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.sideLength = 0.004;
+        this.sideLength = sideLength;
         this.vx = vx;
         this.vy = vy;
-        this.mass = 0.01;
+        this.mass = mass;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = false;
+        this.torque = 0;
+        initVertexList();
     }
 
     public SquaredParticle(double x, double y, double vx, double vy, double mass, double sideLength, boolean idDisposable, boolean isFixed) {
         super(x,y);
         this.type = EntityType.SQUARED_PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.sideLength = 0.004;
+        this.sideLength = sideLength;
         this.vx = vx;
         this.vy = vy;
-        this.mass = 0.01;
+        this.mass = mass;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = isFixed;
+        this.torque = 0;
+        initVertexList();
     }
 
     public double getRelativeVelocityModule(SquaredParticle other) {
@@ -112,6 +125,33 @@ public class SquaredParticle extends Entity {
 //        Vector v = this.getVelocity().subtract(p.getVelocity());
 //        return v.getX() * tangencial.getX() + v.getY() * tangencial.getY();
 //    }
+
+    private void initVertexList() {
+        final double halfL = sideLength / 2;
+
+        Pair v1 = new Pair(x - halfL, y - halfL);   // left down
+        Pair v2 = new Pair(x - halfL, y + halfL);   // left up
+        Pair v3 = new Pair(x + halfL, y + halfL);   // right up
+        Pair v4 = new Pair(x + halfL, y - halfL);   // right down
+
+        vertexList.set(VertexType.LEFT_DOWN.ordinal(), v1);
+        vertexList.set(VertexType.LEFT_UP.ordinal(), v2);
+        vertexList.set(VertexType.RIGHT_UP.ordinal(), v3);
+        vertexList.set(VertexType.RIGHT_DOWN.ordinal(), v4);
+    }
+
+    public List<Pair> getVertexPositionList() {
+        // TODO: Considerar el torque
+        // FIXME: Update list instead
+        final double halfL = sideLength / 2;
+
+        Pair v1 = new Pair(x - halfL, y + halfL);   // left up
+        Pair v2 = new Pair(x - halfL, y - halfL);   // left down
+        Pair v3 = new Pair(x + halfL, y + halfL);   // right up
+        Pair v4 = new Pair(x + halfL, y - halfL);   // right down
+
+        return Arrays.asList(v1, v2, v3, v4);
+    }
 
     @Override
     public int hashCode() {

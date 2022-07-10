@@ -4,7 +4,13 @@ import cell_index_method.Cell;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import utils.GFG;
+import utils.Pair;
+import utils.Utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -17,6 +23,7 @@ public abstract class Entity {
     protected double y;
     protected EntityType type;
     protected Cell cell;
+    private final static double DISK_RADIUS = 1e-3; // FIXME: TBD
 
     public Entity(double x, double y) {
         this.x = x;
@@ -105,6 +112,99 @@ public abstract class Entity {
 
         System.out.println("Bug");
         return 0.0;
+    }
+
+    /* Para el caso entre dos particulas:
+    *  Retorna una lista de 8 listas de Particle (con 2 Particle cada una).
+    *  Las primeras 4 listas: disk1 es el vertice de la p1 y disk2 el punto en el edge de p2.
+    *  Las ultimas 4 listas: disk1 es el punto en el edge de p1 y disk2 el vertice de la p2.
+    *  Puede darse el caso que los ambos disks sean de los vertices (de cada una).
+    *
+    *  Para el caso con una pared, retorna una lista de 4 elementos.
+    *  Donde disk1 es el vertice de la particula y disk2 el punto de contacto en la pared.
+    *  Puede darse el caso que sea un vertice de la pared.
+    * */
+    public static List<List<Particle>> overlappedDisksList(SquaredParticle squaredParticle, Entity other) {
+        List<Pair> vertexList = squaredParticle.getVertexList();
+
+        if (other.getType().equals(EntityType.SQUARED_PARTICLE)) {
+            List<Pair> vertexListOther = ((SquaredParticle) other).getVertexList();
+
+            List<List<Pair>> aux1 = vertexAndEdgeAtMinDistance(vertexList, vertexListOther);
+            List<List<Pair>> aux2 = vertexAndEdgeAtMinDistance(vertexListOther, vertexList);
+            aux1.addAll(aux2);
+
+            if(aux1.size() != 8)
+                System.out.println("Something is wrong, list size should be 8.");
+
+            return getDisksList(aux1);
+        }
+
+        if (other.getType().equals(EntityType.WALL)) {
+            List<Pair> vertexListOther = ((Wall) other).getVertexList();  // FIXME: check bottom wall case
+            List<List<Pair>> aux1 = vertexAndEdgeAtMinDistance(vertexList, vertexListOther);
+
+            if(aux1.size() != 4)
+                System.out.println("Something is wrong, list size should be 4.");
+
+            return getDisksList(aux1);
+        }
+
+        System.out.println("overlappedDisks BUG");
+        return null;    // shouldn't happen
+    }
+
+    // retorna una lista de listas de 4 pares: los puntos del edge, el vertice y la distancia entre los mismos
+    private static List<List<Pair>> vertexAndEdgeAtMinDistance(List<Pair> vertexList, List<Pair> vertexListOther) {
+        List<List<Pair>> lists = new ArrayList<>(4);
+
+        for(Pair vertex : vertexList) {
+            double minD = 1e10; // infinite
+            Pair lineP1 = new Pair(0, 0), lineP2 = new Pair(0, 0), v = new Pair(0, 0);
+
+            // LEFT_DOWN, LEFT_UP, RIGHT_UP, RIGHT_DOWN
+            for(int i = 0; i < SquaredParticle.VertexType.values().length; i++) {
+                Pair p1 = vertexListOther.get(i);
+                Pair p2 = vertexListOther.get((i + 1) % 4);
+
+                double d = GFG.minDistance(p1, p2, vertex);
+
+                if(d < minD) {
+                    minD = d;
+                    lineP1 = p1;
+                    lineP2 = p2;
+                    v = vertex;
+                }
+            }
+            lists.add(Arrays.asList(lineP1, lineP2, v, new Pair(minD, 0)));
+        }
+
+        return lists;
+    }
+
+    private static List<List<Particle>> getDisksList(List<List<Pair>> lists) {
+        List<List<Particle>> disksList = new ArrayList<>();
+
+        for(List<Pair> list : lists) {
+            double minD = list.get(3).getX();
+            Pair edgeP1 = list.get(0);
+            Pair edgeP2 = list.get(1);
+            Pair v = list.get(2);
+
+            Pair p = (Utils.distance(v, edgeP1) < Utils.distance(v, edgeP2)) ? edgeP1 : edgeP2;
+            Particle vParticle = new Particle(v.getX(), v.getY(), DISK_RADIUS);
+
+            if (Double.compare(Utils.distance(v, p), minD) == 0)    // El punto mas cercano es otro vertice
+                disksList.add(Arrays.asList(vParticle, new Particle(p.getX(), p.getY(), DISK_RADIUS)));
+            else {
+                double d = Math.sqrt(Math.pow(Utils.distance(v, edgeP1), 2) - Math.pow(minD, 2));    // distance between edge vertex and point to be found
+                Pair contactPoint = GFG.getPoint(edgeP1, edgeP2, d);   // punto buscado en el edge
+
+                disksList.add(Arrays.asList(vParticle, new Particle(contactPoint.getX(), contactPoint.getY(), DISK_RADIUS)));
+            }
+        }
+
+        return disksList;
     }
 
     public static double overlapD1(Entity entity, Entity other){

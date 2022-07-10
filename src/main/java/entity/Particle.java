@@ -22,6 +22,12 @@ public class Particle extends Entity{
     private Cell cell;
     private boolean isFixed;
 
+    public Particle(double x, double y, double radius) {
+        super(x, y);
+        this.type = EntityType.PARTICLE;
+        this.radius = radius;
+    }
+
     public Particle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
         super(x,y);
         this.type = EntityType.PARTICLE;
