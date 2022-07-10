@@ -42,13 +42,19 @@ public abstract class Entity {
         return hypot - ((Particle)particle).getRadius() - ((Particle)other).getRadius();
     }
 
+    public static double distanceFromRadius(SquaredParticle particle, Entity other) {
+        //TODO: Implementar
+        return 0.0;
+    }
+
     public enum EntityType {
         PARTICLE, SQUARED_PARTICLE, WALL    //TODO: Fix methods for squared particles
     }
 
     public static double distance(Entity entity, Entity other) {
-        if(entity.getType().equals(EntityType.PARTICLE)) {
-            if(other.getType().equals(EntityType.PARTICLE)) {
+        //TODO: Checkear que squared particle es igual que particle aca
+        if(entity.getType().equals(EntityType.PARTICLE) || entity.getType().equals(EntityType.SQUARED_PARTICLE)) {
+            if(other.getType().equals(EntityType.PARTICLE) || other.getType().equals(EntityType.SQUARED_PARTICLE)) {
                 double xDistance = entity.getX() - other.getX();
                 double yDistance = entity.getY() - other.getY();
                 return Math.hypot(Math.abs(xDistance), Math.abs(yDistance));

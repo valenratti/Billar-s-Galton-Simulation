@@ -49,11 +49,6 @@ public class BeemanSquaredParticle /*implements Integrator*/ {
         double vxNext = nextVelocity(vx, ax, axPrev, fNext.getX() / m);
         double vyNext = nextVelocity(vy, ay, ayPrev, fNext.getY() / m);
 
-        if(ryNext <= 0.611 + 0.01 && rxNext >= 0.611){
-            vxNext = 0.0;
-            vyNext = 0.0;
-        }
-
         particle.updateState(rxNext, ryNext, vxNext, vyNext);
         fPrev = f;
 

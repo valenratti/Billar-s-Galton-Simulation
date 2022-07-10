@@ -14,4 +14,5 @@ public class CIMConfig {
     private Double minParticleRadius;
     private Double maxParticleRadius;
     private Double particleMass;
+    private Double openWidth;
 }

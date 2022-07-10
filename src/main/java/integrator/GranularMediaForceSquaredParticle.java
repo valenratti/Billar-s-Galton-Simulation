@@ -13,9 +13,9 @@ public class GranularMediaForceSquaredParticle /*implements System*/ {
 
     private SquaredParticle particle;
     private NeighbourWrapperSquaredParticle neighbourWrapper;
-    private double kn;
-    private double kt;
-    private double gamma;
+    private final double kn;
+    private final double kt;
+    private final double gamma;
 
     public GranularMediaForceSquaredParticle(SquaredParticle particle, NeighbourWrapperSquaredParticle neighbourWrapper) {
         this.particle = particle;
@@ -30,11 +30,6 @@ public class GranularMediaForceSquaredParticle /*implements System*/ {
     }
 
     Pair getForce() {
-        // TODO: CHECK
-//        if(neighbourWrapper.getWalls().stream().anyMatch((wall) -> wall.getWallType().equals(Wall.WallType.BOTTOM_WALL))) {
-//            particle.setVx(0.0);
-//            particle.setVy(0.0);
-//        }
         Pair forceFromParticles = forceFromParticles(neighbourWrapper.getParticles());
         Pair forceFromWalls = forceFromWalls(neighbourWrapper.getWalls());
         Pair gravityForce = new Pair(0.0,-9.8 * particle.getMass());

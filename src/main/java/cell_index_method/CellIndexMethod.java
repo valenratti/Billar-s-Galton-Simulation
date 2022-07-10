@@ -55,7 +55,6 @@ public class CellIndexMethod {
     private List<Wall> spawnWalls(){
         List<Wall> walls = new ArrayList<>();
 
-//        int topCellRow = (int) Math.floor((4.0 - 0.0006/4) / this.cellSideLength);
 
         int leftWallColumn = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall leftWall = new Wall(0.0, 1.0, 1.0, Wall.WallType.LEFT_AREA_WALL);
@@ -63,25 +62,28 @@ public class CellIndexMethod {
         int rightWallColumn = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall rightWall = new Wall(0.3, 1.0, 1.0, Wall.WallType.RIGHT_AREA_WALL);
 
-//        int topWallRow = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
-//        Wall topWall = new Wall(-0.6, 5.0, 1.2, Wall.WallType.TOP_WALL);
-
         int bottomWallRow = (int) Math.floor((0.1 + cellSideLength / 100) / this.cellSideLength);
+        int startDoorColumn = (int) Math.floor(( (0.15 - config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
+        int endDoorColumn = (int) Math.floor(( (0.15 + config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
         Wall bottomWall = new Wall(0.0, 0.1, 0.3, Wall.WallType.BOTTOM_WALL);
+
 
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
         Set<Integer> allColumns = cellMap.keySet().stream().map(CellCoordinates::getColumn).sorted().collect(Collectors.toSet());
 
+        //left and right wall will be added in all the cells from the sides.
         for(Integer row : allRows){
             Cell leftCell = cellMap.get(new CellCoordinates(row,leftWallColumn));
             Cell rightCell = cellMap.get(new CellCoordinates(row,rightWallColumn));
             leftCell.addWall(leftWall);
             rightCell.addWall(rightWall);
         }
-
+        //Bottom cell will be added in all cells at y=0.1 which are not in the open width
         for(Integer column : allColumns){
-            Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow,column));
-            bottomCell.addWall(bottomWall);
+            if(!(column >= startDoorColumn && column <= endDoorColumn) || config.getOpenWidth() == 0) {
+                Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow, column));
+                bottomCell.addWall(bottomWall);
+            }
         }
 
         return walls;

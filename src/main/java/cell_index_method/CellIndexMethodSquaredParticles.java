@@ -19,7 +19,6 @@ public class CellIndexMethodSquaredParticles {
     private boolean periodicBorder;
     private final int cellsPerRow;
     private final int cellsPerColumn;
-    private final int negativeCellsPerColumn;
     private final double cellSideLength;
     private final CIMConfig config;
     private final List<SquaredParticle> particles;
@@ -31,7 +30,6 @@ public class CellIndexMethodSquaredParticles {
         this.config = config;
         this.cellSideLength = config.getMaxParticleRadius() * 2;
         this.cellsPerRow = calculateCellsPerRow();
-        this.negativeCellsPerColumn = calculateCellsPerColumn(0.1);
         this.cellsPerColumn = calculateCellsPerColumn();
         this.cellMap = new HashMap<>();
         this.currentOccupiedCells = new HashSet<>();
@@ -54,24 +52,21 @@ public class CellIndexMethodSquaredParticles {
 
     private List<Wall> spawnWalls(){
         List<Wall> walls = new ArrayList<>();
-
-//        int topCellRow = (int) Math.floor((4.0 - 0.0006/4) / this.cellSideLength);
-
         int leftWallColumn = cellMap.keySet().stream().min(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall leftWall = new Wall(0.0, 1.0, 1.0, Wall.WallType.LEFT_AREA_WALL);
 
         int rightWallColumn = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getColumn)).get().getColumn();
         Wall rightWall = new Wall(0.3, 1.0, 1.0, Wall.WallType.RIGHT_AREA_WALL);
 
-//        int topWallRow = cellMap.keySet().stream().max(Comparator.comparingInt(CellCoordinates::getRow)).get().getRow();
-//        Wall topWall = new Wall(-0.6, 5.0, 1.2, Wall.WallType.TOP_WALL);
-
         int bottomWallRow = (int) Math.floor((0.1 + cellSideLength / 100) / this.cellSideLength);
+        int startDoorColumn = (int) Math.floor(( (0.15 - config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
+        int endDoorColumn = (int) Math.floor(( (0.15 + config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
         Wall bottomWall = new Wall(0.0, 0.1, 0.3, Wall.WallType.BOTTOM_WALL);
 
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
         Set<Integer> allColumns = cellMap.keySet().stream().map(CellCoordinates::getColumn).sorted().collect(Collectors.toSet());
 
+        //left and right wall will be added in all the cells from the sides.
         for(Integer row : allRows){
             Cell leftCell = cellMap.get(new CellCoordinates(row,leftWallColumn));
             Cell rightCell = cellMap.get(new CellCoordinates(row,rightWallColumn));
@@ -79,9 +74,12 @@ public class CellIndexMethodSquaredParticles {
             rightCell.addWall(rightWall);
         }
 
+        //Bottom cell will be added in all cells at y=0.1
         for(Integer column : allColumns){
-            Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow,column));
-            bottomCell.addWall(bottomWall);
+            if(!(column >= startDoorColumn && column <= endDoorColumn) || config.getOpenWidth() == 0) {
+                Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow, column));
+                bottomCell.addWall(bottomWall);
+            }
         }
 
         return walls;
@@ -96,19 +94,19 @@ public class CellIndexMethodSquaredParticles {
         for(int i=0; i< particlesN; i++){
             CellCoordinates coords = possibleCells.get(i);
             double particleX = coords.getColumn() * cellSideLength + (cellSideLength / 2); // centered
-            double particleY = coords.getRow() * cellSideLength + cellSideLength / 2; //centered
-            double randLength = Utils.rand(7.07 * 10e-3, 0.0106);
+            double particleY = coords.getRow() * cellSideLength + (cellSideLength / 2); //centered
+            double randLength = Utils.rand(7.07 * 1e-3, 0.0106);
             SquaredParticle particle = new SquaredParticle(particleX, particleY, 0.0, 0.0, 0.01, randLength, false, false);
             Cell cell = cellMap.get(coords);
-            cell.addSquaredParticle(particle);
             particle.setCell(cell);
+            cell.addSquaredParticle(particle);
             squaredParticles.add(particle);
         }
         return squaredParticles;
     }
 
-    public Map<SquaredParticle, NeighbourWrapper> calculateNeighbours() {
-        Map<SquaredParticle, NeighbourWrapper> neighboursMap = new HashMap<>();
+    public Map<SquaredParticle, NeighbourWrapperSquaredParticle> calculateNeighbours() {
+        Map<SquaredParticle, NeighbourWrapperSquaredParticle> neighboursMap = new HashMap<>();
 
         for(Cell cell : currentOccupiedCells.stream().map(cellMap::get).collect(Collectors.toList())){
             List<Cell> neighbourCells = calculateNeighbourCells(cell.getRow(), cell.getColumn())
@@ -118,7 +116,7 @@ public class CellIndexMethodSquaredParticles {
             List<SquaredParticle> onlyParticleEntities = getParticleEntities(cell.getEntityList());
 
             for (SquaredParticle particle : onlyParticleEntities) {
-                NeighbourWrapper currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapper());
+                NeighbourWrapperSquaredParticle currentParticleNeighbours = neighboursMap.getOrDefault(particle, new NeighbourWrapperSquaredParticle());
                 for(Cell neighbourCell : neighbourCells) {
 
                     //Identify all neighbours, they can be walls or particles
@@ -133,7 +131,7 @@ public class CellIndexMethodSquaredParticles {
 
                     neighbours.forEach((neighbour) -> {
                         if(neighbour.getType().equals(Entity.EntityType.PARTICLE)) {
-                            NeighbourWrapper neighbourNeighbours = neighboursMap.getOrDefault((Particle) neighbour, new NeighbourWrapper());
+                            NeighbourWrapperSquaredParticle neighbourNeighbours = neighboursMap.getOrDefault((SquaredParticle) neighbour, new NeighbourWrapperSquaredParticle());
                             neighbourNeighbours.add(particle);
                             neighboursMap.put((SquaredParticle) neighbour, neighbourNeighbours);
                         }

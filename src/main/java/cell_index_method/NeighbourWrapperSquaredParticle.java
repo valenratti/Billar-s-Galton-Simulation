@@ -24,7 +24,7 @@ public class NeighbourWrapperSquaredParticle {
     }
 
     public void add(Entity entity){
-        if(entity.getType().equals(Entity.EntityType.PARTICLE)) {
+        if(entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE)) {
             particles.add((SquaredParticle) entity);
             return;
         }
@@ -39,7 +39,7 @@ public class NeighbourWrapperSquaredParticle {
 
     public static NeighbourWrapperSquaredParticle fromEntities(List<Entity> entities){
         List<SquaredParticle> particles = entities.stream().map((entity) -> {
-            if (entity.getType().equals(Entity.EntityType.PARTICLE)) {
+            if (entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE)) {
                 return (SquaredParticle) entity;
             } else return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class NeighbourWrapperSquaredParticle {
 
     public void addAll(List<Entity> neighbours) {
         List<SquaredParticle> currentParticles = neighbours.stream().map((entity) -> {
-            if (entity.getType().equals(Entity.EntityType.PARTICLE)) {
+            if (entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE)) {
                 return (SquaredParticle) entity;
             } else return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
