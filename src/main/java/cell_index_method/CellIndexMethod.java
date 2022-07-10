@@ -63,7 +63,10 @@ public class CellIndexMethod {
         Wall rightWall = new Wall(0.3, 1.0, 1.0, Wall.WallType.RIGHT_AREA_WALL);
 
         int bottomWallRow = (int) Math.floor((0.1 + cellSideLength / 100) / this.cellSideLength);
+        int startDoorColumn = (int) Math.floor(( (0.15 - config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
+        int endDoorColumn = (int) Math.floor(( (0.15 + config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
         Wall bottomWall = new Wall(0.0, 0.1, 0.3, Wall.WallType.BOTTOM_WALL);
+
 
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
         Set<Integer> allColumns = cellMap.keySet().stream().map(CellCoordinates::getColumn).sorted().collect(Collectors.toSet());
@@ -75,10 +78,12 @@ public class CellIndexMethod {
             leftCell.addWall(leftWall);
             rightCell.addWall(rightWall);
         }
-        //Bottom cell will be added in all cells at y=0.1
+        //Bottom cell will be added in all cells at y=0.1 which are not in the open width
         for(Integer column : allColumns){
-            Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow,column));
-            bottomCell.addWall(bottomWall);
+            if(!(column >= startDoorColumn && column <= endDoorColumn) || config.getOpenWidth() == 0) {
+                Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow, column));
+                bottomCell.addWall(bottomWall);
+            }
         }
 
         return walls;

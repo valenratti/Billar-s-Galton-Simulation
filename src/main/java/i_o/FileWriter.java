@@ -1,7 +1,9 @@
 package i_o;
 
 import cell_index_method.NeighbourWrapper;
+import cell_index_method.NeighbourWrapperSquaredParticle;
 import entity.Particle;
+import entity.SquaredParticle;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -35,7 +37,20 @@ public class FileWriter {
         simulationBufferedWriter.flush();
     }
 
-//o
+
+    public static void printPositionsSquared(NeighbourWrapperSquaredParticle neighbourWrapper, Integer n) throws IOException {
+        if(simulationBufferedWriter == null){
+            generateXYZFile(n);
+        }
+
+        simulationBufferedWriter.newLine();
+
+        for(SquaredParticle particle : neighbourWrapper.getParticles()){
+            simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getVx() + " " + particle.getVy()  + " ");
+            simulationBufferedWriter.newLine();
+        }
+        simulationBufferedWriter.flush();
+    }
 
 
 

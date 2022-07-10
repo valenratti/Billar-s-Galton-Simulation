@@ -19,7 +19,6 @@ public class CellIndexMethodSquaredParticles {
     private boolean periodicBorder;
     private final int cellsPerRow;
     private final int cellsPerColumn;
-    private final int negativeCellsPerColumn;
     private final double cellSideLength;
     private final CIMConfig config;
     private final List<SquaredParticle> particles;
@@ -31,7 +30,6 @@ public class CellIndexMethodSquaredParticles {
         this.config = config;
         this.cellSideLength = config.getMaxParticleRadius() * 2;
         this.cellsPerRow = calculateCellsPerRow();
-        this.negativeCellsPerColumn = calculateCellsPerColumn(0.1);
         this.cellsPerColumn = calculateCellsPerColumn();
         this.cellMap = new HashMap<>();
         this.currentOccupiedCells = new HashSet<>();
@@ -61,6 +59,8 @@ public class CellIndexMethodSquaredParticles {
         Wall rightWall = new Wall(0.3, 1.0, 1.0, Wall.WallType.RIGHT_AREA_WALL);
 
         int bottomWallRow = (int) Math.floor((0.1 + cellSideLength / 100) / this.cellSideLength);
+        int startDoorColumn = (int) Math.floor(( (0.15 - config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
+        int endDoorColumn = (int) Math.floor(( (0.15 + config.getOpenWidth()/2) + cellSideLength / 100 ) / cellSideLength);
         Wall bottomWall = new Wall(0.0, 0.1, 0.3, Wall.WallType.BOTTOM_WALL);
 
         Set<Integer> allRows = cellMap.keySet().stream().map(CellCoordinates::getRow).sorted().collect(Collectors.toSet());
@@ -76,8 +76,10 @@ public class CellIndexMethodSquaredParticles {
 
         //Bottom cell will be added in all cells at y=0.1
         for(Integer column : allColumns){
-            Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow,column));
-            bottomCell.addWall(bottomWall);
+            if(!(column >= startDoorColumn && column <= endDoorColumn) || config.getOpenWidth() == 0) {
+                Cell bottomCell = cellMap.get(new CellCoordinates(bottomWallRow, column));
+                bottomCell.addWall(bottomWall);
+            }
         }
 
         return walls;
@@ -92,12 +94,12 @@ public class CellIndexMethodSquaredParticles {
         for(int i=0; i< particlesN; i++){
             CellCoordinates coords = possibleCells.get(i);
             double particleX = coords.getColumn() * cellSideLength + (cellSideLength / 2); // centered
-            double particleY = coords.getRow() * cellSideLength + cellSideLength / 2; //centered
-            double randLength = Utils.rand(7.07 * 10e-3, 0.0106);
+            double particleY = coords.getRow() * cellSideLength + (cellSideLength / 2); //centered
+            double randLength = Utils.rand(7.07 * 1e-3, 0.0106);
             SquaredParticle particle = new SquaredParticle(particleX, particleY, 0.0, 0.0, 0.01, randLength, false, false);
             Cell cell = cellMap.get(coords);
-            cell.addSquaredParticle(particle);
             particle.setCell(cell);
+            cell.addSquaredParticle(particle);
             squaredParticles.add(particle);
         }
         return squaredParticles;
@@ -129,7 +131,7 @@ public class CellIndexMethodSquaredParticles {
 
                     neighbours.forEach((neighbour) -> {
                         if(neighbour.getType().equals(Entity.EntityType.PARTICLE)) {
-                            NeighbourWrapperSquaredParticle neighbourNeighbours = neighboursMap.getOrDefault((Particle) neighbour, new NeighbourWrapperSquaredParticle());
+                            NeighbourWrapperSquaredParticle neighbourNeighbours = neighboursMap.getOrDefault((SquaredParticle) neighbour, new NeighbourWrapperSquaredParticle());
                             neighbourNeighbours.add(particle);
                             neighboursMap.put((SquaredParticle) neighbour, neighbourNeighbours);
                         }
