@@ -7,20 +7,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
 public class NeighbourWrapperSquaredParticle {
-    private List<SquaredParticle> particles;
-    private List<Wall> walls;
+    private Set<SquaredParticle> particles;
+    private Set<Wall> walls;
 
     public NeighbourWrapperSquaredParticle() {
-        this.particles = new ArrayList<>();
-        this.walls = new ArrayList<>();
+        this.particles = new HashSet<>();
+        this.walls = new HashSet<>();
     }
 
     public void add(Entity entity){
@@ -33,27 +31,25 @@ public class NeighbourWrapperSquaredParticle {
             walls.add((Wall) entity);
             return;
         }
-
-        System.out.println("Bug");
     }
 
     public static NeighbourWrapperSquaredParticle fromEntities(List<Entity> entities){
-        List<SquaredParticle> particles = entities.stream().map((entity) -> {
+        Set<SquaredParticle> particles = entities.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE)) {
                 return (SquaredParticle) entity;
             } else return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
 
-        List<Wall> walls = entities.stream().map((entity) -> {
+        Set<Wall> walls = entities.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.WALL)) {
                 return (Wall) entity;
             } else return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
 
         return new NeighbourWrapperSquaredParticle(particles, walls);
     }
 
-    public void addAll(List<Entity> neighbours) {
+    public void addAll(Set<Entity> neighbours) {
         List<SquaredParticle> currentParticles = neighbours.stream().map((entity) -> {
             if (entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE)) {
                 return (SquaredParticle) entity;

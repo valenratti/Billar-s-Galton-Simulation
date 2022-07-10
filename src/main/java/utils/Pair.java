@@ -14,4 +14,12 @@ public class Pair {
         this.y = y + other.getY();
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

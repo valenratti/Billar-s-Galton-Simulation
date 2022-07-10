@@ -43,10 +43,12 @@ public class FileWriter {
             generateXYZFile(n);
         }
 
+        simulationBufferedWriter.write(String.valueOf(neighbourWrapper.getParticles().size()));
+        simulationBufferedWriter.newLine();
         simulationBufferedWriter.newLine();
 
         for(SquaredParticle particle : neighbourWrapper.getParticles()){
-            simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getVx() + " " + particle.getVy()  + " ");
+            simulationBufferedWriter.write(particle.getId() + " " + particle.getX() + " " + particle.getY() + " " + particle.getRadius());
             simulationBufferedWriter.newLine();
         }
         simulationBufferedWriter.flush();

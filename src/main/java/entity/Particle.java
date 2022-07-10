@@ -2,11 +2,13 @@ package entity;
 
 import cell_index_method.Cell;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import utils.Pair;
 
 import java.util.Objects;
 
 @Data
+@NoArgsConstructor
 public class Particle extends Entity{
 //    private static Long currentId = 0L;
 
@@ -28,27 +30,14 @@ public class Particle extends Entity{
         this.radius = radius;
     }
 
-    public Particle(double x, double y, double vx, double vy, double mass, boolean idDisposable) {
-        super(x,y);
-        this.type = EntityType.PARTICLE;
-//        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.004;
-        this.vx = vx;
-        this.vy = vy;
-        this.mass = 0.01;
-        this.ax = 0;
-        this.ay = 0;
-        this.isFixed = false;
-    }
-
     public Particle(double x, double y, double vx, double vy, double mass, double radius, boolean idDisposable, boolean isFixed) {
         super(x,y);
         this.type = EntityType.PARTICLE;
 //        this.id = idDisposable ? null : currentId++;
-        this.radius = 0.004;
+        this.radius = radius;
         this.vx = vx;
         this.vy = vy;
-        this.mass = 0.01;
+        this.mass = mass;
         this.ax = 0;
         this.ay = 0;
         this.isFixed = isFixed;
@@ -69,10 +58,15 @@ public class Particle extends Entity{
     }
 
     public double getTangencialRelativeVelocity(Wall wall) {
-            if(this.getX() < wall.getX())
+        switch (wall.getWallType()){
+            case RIGHT_AREA_WALL:
                 return -vy;
-            else
+            case BOTTOM_WALL:
+                return -vx;
+            case LEFT_AREA_WALL:
                 return vy;
+        }
+        return 0.0;
     }
 
     public double getVelocityModule() {

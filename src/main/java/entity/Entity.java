@@ -8,10 +8,8 @@ import utils.GFG;
 import utils.Pair;
 import utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -43,8 +41,31 @@ public abstract class Entity {
     }
 
     public static double distanceFromRadius(SquaredParticle particle, Entity other) {
-        //TODO: Implementar
-        return 0.0;
+        List<List<Particle>> disks = overlappedDisksList(particle, other);
+        assert disks != null;
+
+        Particle first = new Particle();
+        Particle second = new Particle();
+        double minDis = 1e10;
+        for (List<Particle> pairs : disks) {
+            Particle particle1 = pairs.get(0);
+            Particle particle2 = pairs.get(1);
+            double distance = distance(particle1, particle2);
+            if (distance <= minDis) {
+                first = particle1;
+                second = particle2;
+                minDis = distance;
+            }
+        }
+        if(other.getType().equals(EntityType.SQUARED_PARTICLE)) {
+            double toReturn = minDis - first.getRadius() - second.getRadius();
+//            System.out.println(toReturn);
+            return toReturn;
+        }else{
+            double toReturn = distance(first, other) - first.getRadius();
+//            System.out.println(toReturn);
+            return toReturn;
+        }
     }
 
     public enum EntityType {
@@ -52,7 +73,6 @@ public abstract class Entity {
     }
 
     public static double distance(Entity entity, Entity other) {
-        //TODO: Checkear que squared particle es igual que particle aca
         if(entity.getType().equals(EntityType.PARTICLE) || entity.getType().equals(EntityType.SQUARED_PARTICLE)) {
             if(other.getType().equals(EntityType.PARTICLE) || other.getType().equals(EntityType.SQUARED_PARTICLE)) {
                 double xDistance = entity.getX() - other.getX();
@@ -63,7 +83,7 @@ public abstract class Entity {
             if(other.getType().equals(EntityType.WALL)) {
                 Wall wall = (Wall) other;
 
-                if(wall.getWallType().equals(Wall.WallType.TOP_WALL))
+                if(wall.getWallType().equals(Wall.WallType.BOTTOM_WALL))
                     return Math.abs(entity.getY() - wall.getY());
 
                 if(wall.getWallType().equals(Wall.WallType.RIGHT_AREA_WALL))
@@ -89,18 +109,9 @@ public abstract class Entity {
             if(other.getType().equals(EntityType.WALL)){
                 Wall wall = (Wall) other;
 
-                if(wall.getWallType().equals(Wall.WallType.TOP_WALL)) {
-                    if(entity.getY() > wall.getY()) {
-                        System.out.println("overlap top wall " + (((Particle)entity).getRadius() + distance(entity, wall)));
-                        return ((Particle)entity).getRadius() + distance(entity, wall);
-                    }
-
-                    return ((Particle) entity).getRadius() - distance(entity, wall);
-                }
-
                 if(wall.getWallType().equals(Wall.WallType.RIGHT_AREA_WALL)) {
-                    System.out.println("overlap right wall " + (entity.getX() + ((Particle)entity).getRadius() - 0.6));
-                    return entity.getX() + ((Particle)entity).getRadius() - 0.6;
+                    System.out.println("overlap right wall " + (entity.getX() + ((Particle)entity).getRadius() - 0.3));
+                    return entity.getX() + ((Particle)entity).getRadius() - 0.3;
                 }
 
                 if (wall.getWallType().equals(Wall.WallType.LEFT_AREA_WALL)) {
@@ -109,6 +120,11 @@ public abstract class Entity {
                         return ((Particle)entity).getRadius() + distance(entity,wall);
                     }
                     System.out.println("overlap left wall " + (((Particle)entity).getRadius() - distance(entity,wall)) );
+                    return ((Particle)entity).getRadius() - distance(entity,wall);
+                }
+
+                if(wall.getWallType().equals(Wall.WallType.BOTTOM_WALL)){
+                    System.out.println("overlap bottom wall " + (((Particle)entity).getRadius() - distance(entity,wall)) );
                     return ((Particle)entity).getRadius() - distance(entity,wall);
                 }
 
@@ -131,10 +147,10 @@ public abstract class Entity {
     *  Puede darse el caso que sea un vertice de la pared.
     * */
     public static List<List<Particle>> overlappedDisksList(SquaredParticle squaredParticle, Entity other) {
-        List<Pair> vertexList = squaredParticle.getVertexList();
+        List<Pair> vertexList = squaredParticle.getVertexPositionList();
 
         if (other.getType().equals(EntityType.SQUARED_PARTICLE)) {
-            List<Pair> vertexListOther = ((SquaredParticle) other).getVertexList();
+            List<Pair> vertexListOther = ((SquaredParticle) other).getVertexPositionList();
 
             List<List<Pair>> aux1 = vertexAndEdgeAtMinDistance(vertexList, vertexListOther);
             List<List<Pair>> aux2 = vertexAndEdgeAtMinDistance(vertexListOther, vertexList);
@@ -143,7 +159,7 @@ public abstract class Entity {
             if(aux1.size() != 8)
                 System.out.println("Something is wrong, list size should be 8.");
 
-            return getDisksList(aux1);
+            return getDisksList(squaredParticle, other, aux1);
         }
 
         if (other.getType().equals(EntityType.WALL)) {
@@ -153,7 +169,7 @@ public abstract class Entity {
             if(aux1.size() != 4)
                 System.out.println("Something is wrong, list size should be 4.");
 
-            return getDisksList(aux1);
+            return getDisksList(squaredParticle, other, aux1);
         }
 
         System.out.println("overlappedDisks BUG");
@@ -168,27 +184,37 @@ public abstract class Entity {
             double minD = 1e10; // infinite
             Pair lineP1 = new Pair(0, 0), lineP2 = new Pair(0, 0), v = new Pair(0, 0);
 
-            // LEFT_DOWN, LEFT_UP, RIGHT_UP, RIGHT_DOWN
-            for(int i = 0; i < SquaredParticle.VertexType.values().length; i++) {
-                Pair p1 = vertexListOther.get(i);
-                Pair p2 = vertexListOther.get((i + 1) % 4);
-
+            if(vertexListOther.size() == 2){
+                Pair p1 = vertexListOther.get(0);
+                Pair p2 = vertexListOther.get(1);
                 double d = GFG.minDistance(p1, p2, vertex);
+                lists.add(Arrays.asList(p1, p2, vertex, new Pair(d, 0)));
+            }else {
+                // LEFT_DOWN, LEFT_UP, RIGHT_UP, RIGHT_DOWN
+                for (int i = 0; i < SquaredParticle.VertexType.values().length; i++) {
+                    try {
+                        Pair p1 = vertexListOther.get(i);
+                        Pair p2 = vertexListOther.get((i + 1) % 4);
+                        double d = GFG.minDistance(p1, p2, vertex);
 
-                if(d < minD) {
-                    minD = d;
-                    lineP1 = p1;
-                    lineP2 = p2;
-                    v = vertex;
+                        if (d < minD) {
+                            minD = d;
+                            lineP1 = p1;
+                            lineP2 = p2;
+                            v = vertex;
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("here");
+                    }
                 }
+                lists.add(Arrays.asList(lineP1, lineP2, v, new Pair(minD, 0)));
             }
-            lists.add(Arrays.asList(lineP1, lineP2, v, new Pair(minD, 0)));
         }
 
         return lists;
     }
 
-    private static List<List<Particle>> getDisksList(List<List<Pair>> lists) {
+    private static List<List<Particle>> getDisksList(SquaredParticle particle, Entity other, List<List<Pair>> lists) {
         List<List<Particle>> disksList = new ArrayList<>();
 
         for(List<Pair> list : lists) {
@@ -198,15 +224,27 @@ public abstract class Entity {
             Pair v = list.get(2);
 
             Pair p = (Utils.distance(v, edgeP1) < Utils.distance(v, edgeP2)) ? edgeP1 : edgeP2;
-            Particle vParticle = new Particle(v.getX(), v.getY(), DISK_RADIUS);
+            Particle vParticle = new Particle(v.getX(), v.getY(), particle.getVx(), particle.getVy(), particle.getMass(), DISK_RADIUS, false, false);
 
-            if (Double.compare(Utils.distance(v, p), minD) == 0)    // El punto mas cercano es otro vertice
-                disksList.add(Arrays.asList(vParticle, new Particle(p.getX(), p.getY(), DISK_RADIUS)));
+            if (Double.compare(Utils.distance(v, p), minD) == 0) {   // El punto mas cercano es otro vertice
+                double vx = 0, vy = 0, mass = 0;
+                if(other.getType().equals(EntityType.SQUARED_PARTICLE)){
+                    vx = ((SquaredParticle)other).getVx();
+                    vy = ((SquaredParticle)other).getVy();
+                    mass = ((SquaredParticle)other).getMass();
+                }
+                disksList.add(Arrays.asList(vParticle, new Particle(p.getX(), p.getY(), vx, vy, mass, DISK_RADIUS, false, false)));
+            }
             else {
                 double d = Math.sqrt(Math.pow(Utils.distance(v, edgeP1), 2) - Math.pow(minD, 2));    // distance between edge vertex and point to be found
                 Pair contactPoint = GFG.getPoint(edgeP1, edgeP2, d);   // punto buscado en el edge
-
-                disksList.add(Arrays.asList(vParticle, new Particle(contactPoint.getX(), contactPoint.getY(), DISK_RADIUS)));
+                double vx = 0, vy = 0, mass = 0;
+                if(other.getType().equals(EntityType.SQUARED_PARTICLE)){
+                    vx = ((SquaredParticle)other).getVx();
+                    vy = ((SquaredParticle)other).getVy();
+                    mass = ((SquaredParticle)other).getMass();
+                }
+                disksList.add(Arrays.asList(vParticle, new Particle(contactPoint.getX(), contactPoint.getY(), vx, vy, mass, DISK_RADIUS, false, false)));
             }
         }
 

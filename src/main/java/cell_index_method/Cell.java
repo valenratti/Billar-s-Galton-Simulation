@@ -40,7 +40,7 @@ public class Cell {
     }
 
     public void clearParticles(){
-        entityList.removeIf((entity) -> entity.getType().equals(Entity.EntityType.PARTICLE));
+        entityList.removeIf((entity) -> entity.getType().equals(Entity.EntityType.SQUARED_PARTICLE));
     }
 
     @Override

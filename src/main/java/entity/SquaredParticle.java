@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Data
 public class SquaredParticle extends Entity {
@@ -25,31 +26,18 @@ public class SquaredParticle extends Entity {
     private Cell cell;
     private boolean isFixed;
     private double torque;
-    private List<Pair> vertexList = new ArrayList<>(4);
+    private double angleAcceleration;
+    private List<Pair> vertexList;
 
     public enum VertexType {
         LEFT_DOWN, LEFT_UP, RIGHT_UP, RIGHT_DOWN
     }
 
-    public SquaredParticle(double x, double y, double vx, double vy, double mass, double sideLength, boolean idDisposable) {
-        super(x,y);
-        this.type = EntityType.SQUARED_PARTICLE;
-//        this.id = idDisposable ? null : currentId++;
-        this.sideLength = sideLength;
-        this.vx = vx;
-        this.vy = vy;
-        this.mass = mass;
-        this.ax = 0;
-        this.ay = 0;
-        this.isFixed = false;
-        this.torque = 0;
-        initVertexList();
-    }
+
 
     public SquaredParticle(double x, double y, double vx, double vy, double mass, double sideLength, boolean idDisposable, boolean isFixed) {
         super(x,y);
         this.type = EntityType.SQUARED_PARTICLE;
-//        this.id = idDisposable ? null : currentId++;
         this.sideLength = sideLength;
         this.vx = vx;
         this.vy = vy;
@@ -58,6 +46,8 @@ public class SquaredParticle extends Entity {
         this.ay = 0;
         this.isFixed = isFixed;
         this.torque = 0;
+        this.angleAcceleration = 0;
+        this.vertexList = new ArrayList<>();
         initVertexList();
     }
 
@@ -134,10 +124,10 @@ public class SquaredParticle extends Entity {
         Pair v3 = new Pair(x + halfL, y + halfL);   // right up
         Pair v4 = new Pair(x + halfL, y - halfL);   // right down
 
-        vertexList.set(VertexType.LEFT_DOWN.ordinal(), v1);
-        vertexList.set(VertexType.LEFT_UP.ordinal(), v2);
-        vertexList.set(VertexType.RIGHT_UP.ordinal(), v3);
-        vertexList.set(VertexType.RIGHT_DOWN.ordinal(), v4);
+        vertexList.add(v1);
+        vertexList.add(v2);
+        vertexList.add(v3);
+        vertexList.add(v4);
     }
 
     public List<Pair> getVertexPositionList() {
@@ -151,6 +141,24 @@ public class SquaredParticle extends Entity {
         Pair v4 = new Pair(x + halfL, y - halfL);   // right down
 
         return Arrays.asList(v1, v2, v3, v4);
+    }
+
+    public double getRadius(){
+        return sideLength * Math.sqrt(2) / 2;
+    }
+
+    public void rotateBy(Double angle){
+        List<Pair> tempVertexPositions = this.getVertexPositionList()
+                .stream().map((pair) -> new Pair(pair.getX() - x, pair.getY() - y))
+                .collect(Collectors.toList());
+
+        for(Pair pair : tempVertexPositions) {
+            double realPart = Math.cos(angle) * pair.getX() - Math.sin(angle) * pair.getY();
+            double imaginaryPart = Math.cos(angle) * pair.getY() + Math.sin(angle) * pair.getX();
+            pair.setX(realPart + this.x);
+            pair.setY(imaginaryPart + this.y);
+        }
+        this.vertexList = tempVertexPositions;
     }
 
     @Override

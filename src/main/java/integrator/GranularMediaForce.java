@@ -66,10 +66,9 @@ public class GranularMediaForce implements System {
         Pair force = new Pair(0.0, 0.0);
         for(Wall wall : walls) {
             double overlap = Entity.overlap(particle, wall);
-            double overlapD1 = Entity.overlapD1(particle,wall);
 //            java.lang.System.out.println("OverlapD1 WALLS : " + overlapD1);
             double relativeVelocity = particle.getTangencialRelativeVelocity(wall);
-            double normal = -kn * overlap - gamma * overlapD1;
+            double normal = -kn * overlap;
             double tangencial = -kt*overlap*relativeVelocity;
             switch (wall.getWallType()) {
                 case TOP_WALL:
