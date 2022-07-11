@@ -149,5 +149,3 @@ public class GFG
         System.out.print(minDistance(A, B, E));
     }
 }
-
-// This code is contributed by 29AjayKumar
